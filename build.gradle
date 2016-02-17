@@ -1,0 +1,14 @@
+apply plugin: "java"
+apply plugin: "groovy"
+apply plugin: "idea"
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.codehaus.groovy:groovy-all:2.4.5"
+    compile "com.amazonaws:aws-java-sdk:1.10.52"
+}
+
