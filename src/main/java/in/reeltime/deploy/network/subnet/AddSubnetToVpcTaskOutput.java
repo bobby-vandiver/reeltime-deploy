@@ -1,4 +1,4 @@
-package in.reeltime.deploy.network;
+package in.reeltime.deploy.network.subnet;
 
 import in.reeltime.deploy.task.TaskOutput;
 

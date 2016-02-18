@@ -3,6 +3,10 @@ package in.reeltime.deploy;
 import com.amazonaws.services.ec2.AmazonEC2;
 import in.reeltime.deploy.aws.AwsClientFactory;
 import in.reeltime.deploy.network.*;
+import in.reeltime.deploy.network.subnet.AddSubnetToVpcTask;
+import in.reeltime.deploy.network.subnet.AddSubnetToVpcTaskInput;
+import in.reeltime.deploy.network.subnet.AddSubnetToVpcTaskOutput;
+import in.reeltime.deploy.network.vpc.*;
 import org.apache.commons.cli.*;
 
 public class Application {

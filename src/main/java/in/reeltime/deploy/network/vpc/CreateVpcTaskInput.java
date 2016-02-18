@@ -1,4 +1,4 @@
-package in.reeltime.deploy.network;
+package in.reeltime.deploy.network.vpc;
 
 import in.reeltime.deploy.task.TaskInput;
 

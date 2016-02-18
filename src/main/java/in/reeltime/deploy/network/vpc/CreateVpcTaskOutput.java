@@ -1,4 +1,4 @@
-package in.reeltime.deploy.network;
+package in.reeltime.deploy.network.vpc;
 
 import com.amazonaws.services.ec2.model.Vpc;
 import in.reeltime.deploy.task.TaskOutput;

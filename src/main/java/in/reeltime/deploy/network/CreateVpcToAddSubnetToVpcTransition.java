@@ -1,6 +1,8 @@
 package in.reeltime.deploy.network;
 
 import com.amazonaws.services.ec2.model.Vpc;
+import in.reeltime.deploy.network.subnet.AddSubnetToVpcTaskInput;
+import in.reeltime.deploy.network.vpc.CreateVpcTaskOutput;
 import in.reeltime.deploy.task.TaskInput;
 import in.reeltime.deploy.task.TaskOutput;
 import in.reeltime.deploy.task.TaskTransition;
