@@ -1,8 +1,8 @@
 package in.reeltime.deploy;
 
+import com.amazonaws.services.ec2.AmazonEC2;
 import in.reeltime.deploy.aws.AwsClientFactory;
-import in.reeltime.deploy.network.CreateVpcTask;
-import in.reeltime.deploy.network.CreateVpcTaskInput;
+import in.reeltime.deploy.network.*;
 import org.apache.commons.cli.*;
 
 public class Application {
@@ -24,13 +24,7 @@ public class Application {
             System.out.println("environment name = " + environmentName);
             System.out.println("removeExistingResources = " + removeExistingResources);
 
-            AwsClientFactory awsClientFactory = new AwsClientFactory();
-
-            CreateVpcTaskInput input = new CreateVpcTaskInput("test", "10.0.0.0/16");
-            CreateVpcTask task = new CreateVpcTask(awsClientFactory.ec2());
-
-            task.execute(input);
-            System.out.println("Success!");
+            doIt();
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
@@ -45,5 +39,24 @@ public class Application {
         options.addOption("r", "rm", false, "Flag to determine if the created resources should be removed if they exist.");
 
         return options;
+    }
+
+    private static void doIt() {
+        AwsClientFactory awsClientFactory = new AwsClientFactory();
+        AmazonEC2 ec2 = awsClientFactory.ec2();
+
+        CreateVpcTaskInput createVpcTaskInput = new CreateVpcTaskInput("test", "10.0.0.0/16");
+        CreateVpcTask createVpcTask = new CreateVpcTask(ec2);
+
+        CreateVpcTaskOutput createVpcTaskOutput = createVpcTask.execute(createVpcTaskInput);
+
+        CreateVpcToAddSubnetToVpcTransition transition = new CreateVpcToAddSubnetToVpcTransition("public", "10.0.0.0/24");
+
+        AddSubnetToVpcTaskInput addSubnetToVpcTaskInput = transition.transition(createVpcTaskOutput);
+        AddSubnetToVpcTask addSubnetToVpcTask = new AddSubnetToVpcTask(ec2);
+
+        AddSubnetToVpcTaskOutput addSubnetToVpcTaskOutput = addSubnetToVpcTask.execute(addSubnetToVpcTaskInput);
+
+        System.out.println("Made it!");
     }
 }
