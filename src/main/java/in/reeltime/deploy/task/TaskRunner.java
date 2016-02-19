@@ -26,6 +26,7 @@ public class TaskRunner {
         ec2 = awsClientFactory.ec2();
     }
 
+    // TODO: Allow route tables to be named
     public void run() {
         Vpc vpc = createVpc("test", "10.0.0.0/16");
 
@@ -34,6 +35,9 @@ public class TaskRunner {
 
         InternetGateway internetGateway = addInternetGatewayToVpc(vpc);
         addRouteToRouteTable(publicRouteTable, "0.0.0.0/0", internetGateway.getInternetGatewayId());
+
+        Subnet privateSubnet = addSubnetToVpc(vpc, "private", "10.0.1.0/24");
+        RouteTable privateRouteTable = createRouteTableForSubnet(vpc, privateSubnet);
     }
 
     private Vpc createVpc(String name, String cidrBlock) {
