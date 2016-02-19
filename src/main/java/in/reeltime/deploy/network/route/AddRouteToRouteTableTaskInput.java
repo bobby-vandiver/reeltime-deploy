@@ -1,23 +1,22 @@
 package in.reeltime.deploy.network.route;
 
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.Vpc;
+import com.amazonaws.services.ec2.model.RouteTable;
 import in.reeltime.deploy.task.TaskInput;
 
-public class AddRouteToSubnetTaskInput implements TaskInput {
+public class AddRouteToRouteTableTaskInput implements TaskInput {
 
-    private final Vpc vpc;
+    private final RouteTable routeTable;
     private final String cidrBlock;
     private final String gatewayId;
 
-    public AddRouteToSubnetTaskInput(Vpc vpc, String cidrBlock, String gatewayId) {
-        this.vpc = vpc;
+    public AddRouteToRouteTableTaskInput(RouteTable routeTable, String cidrBlock, String gatewayId) {
+        this.routeTable = routeTable;
         this.cidrBlock = cidrBlock;
         this.gatewayId = gatewayId;
     }
 
-    public Vpc getVpc() {
-        return vpc;
+    public RouteTable getRouteTable() {
+        return routeTable;
     }
 
     public String getCidrBlock() {
