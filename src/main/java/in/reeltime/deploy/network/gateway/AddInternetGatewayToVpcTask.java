@@ -25,7 +25,7 @@ public class AddInternetGatewayToVpcTask implements Task<AddInternetGatewayToVpc
         InternetGateway internetGateway = createInternetGateway();
         attachGatewayToVpc(internetGateway, vpc);
 
-        return new AddInternetGatewayToVpcTaskOutput();
+        return new AddInternetGatewayToVpcTaskOutput(internetGateway);
     }
 
     private InternetGateway createInternetGateway() {

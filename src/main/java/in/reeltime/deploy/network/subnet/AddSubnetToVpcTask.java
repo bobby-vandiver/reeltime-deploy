@@ -25,7 +25,7 @@ public class AddSubnetToVpcTask implements Task<AddSubnetToVpcTaskInput, AddSubn
     public AddSubnetToVpcTaskOutput execute(AddSubnetToVpcTaskInput input) {
         Subnet subnet = createSubnet(input.getVpc(), input.getCidrBlock());
         setSubnetName(subnet, input.getName());
-        return new AddSubnetToVpcTaskOutput();
+        return new AddSubnetToVpcTaskOutput(subnet);
     }
 
     private Subnet createSubnet(Vpc vpc, String cidrBlock) {

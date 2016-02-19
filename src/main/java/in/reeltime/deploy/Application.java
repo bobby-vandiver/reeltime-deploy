@@ -1,8 +1,14 @@
 package in.reeltime.deploy;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.aws.AwsClientFactory;
-import in.reeltime.deploy.network.*;
+import in.reeltime.deploy.network.gateway.AddInternetGatewayToVpcTask;
+import in.reeltime.deploy.network.gateway.AddInternetGatewayToVpcTaskInput;
+import in.reeltime.deploy.network.gateway.AddInternetGatewayToVpcTaskOutput;
+import in.reeltime.deploy.network.route.AddRouteToSubnetTask;
+import in.reeltime.deploy.network.route.AddRouteToSubnetTaskInput;
+import in.reeltime.deploy.network.route.AddRouteToSubnetTaskOutput;
 import in.reeltime.deploy.network.subnet.AddSubnetToVpcTask;
 import in.reeltime.deploy.network.subnet.AddSubnetToVpcTaskInput;
 import in.reeltime.deploy.network.subnet.AddSubnetToVpcTaskOutput;
@@ -51,15 +57,25 @@ public class Application {
 
         CreateVpcTaskInput createVpcTaskInput = new CreateVpcTaskInput("test", "10.0.0.0/16");
         CreateVpcTask createVpcTask = new CreateVpcTask(ec2);
-
         CreateVpcTaskOutput createVpcTaskOutput = createVpcTask.execute(createVpcTaskInput);
 
-        CreateVpcToAddSubnetToVpcTransition transition = new CreateVpcToAddSubnetToVpcTransition("public", "10.0.0.0/24");
+        Vpc vpc = createVpcTaskOutput.getVpc();
 
-        AddSubnetToVpcTaskInput addSubnetToVpcTaskInput = transition.transition(createVpcTaskOutput);
+        AddSubnetToVpcTaskInput addSubnetToVpcTaskInput = new AddSubnetToVpcTaskInput(vpc, "public", "10.0.0.0/24");
         AddSubnetToVpcTask addSubnetToVpcTask = new AddSubnetToVpcTask(ec2);
-
         AddSubnetToVpcTaskOutput addSubnetToVpcTaskOutput = addSubnetToVpcTask.execute(addSubnetToVpcTaskInput);
+
+        Subnet subnet = addSubnetToVpcTaskOutput.getSubnet();
+
+        AddInternetGatewayToVpcTaskInput addInternetGatewayToVpcTaskInput = new AddInternetGatewayToVpcTaskInput(vpc);
+        AddInternetGatewayToVpcTask addInternetGatewayToVpcTask = new AddInternetGatewayToVpcTask(ec2);
+        AddInternetGatewayToVpcTaskOutput addInternetGatewayToVpcTaskOutput = addInternetGatewayToVpcTask.execute(addInternetGatewayToVpcTaskInput);
+
+        InternetGateway internetGateway = addInternetGatewayToVpcTaskOutput.getInternetGateway();
+
+        AddRouteToSubnetTaskInput addRouteToSubnetTaskInput = new AddRouteToSubnetTaskInput(vpc, "0.0.0.0/0", internetGateway.getInternetGatewayId());
+        AddRouteToSubnetTask addRouteToSubnetTask = new AddRouteToSubnetTask(ec2);
+        AddRouteToSubnetTaskOutput addRouteToSubnetTaskOutput = addRouteToSubnetTask.execute(addRouteToSubnetTaskInput);
 
         System.out.println("Made it!");
     }
