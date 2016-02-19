@@ -4,7 +4,6 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import com.google.common.collect.Lists;
 import in.reeltime.deploy.task.Task;
-import in.reeltime.deploy.task.TaskInput;
 
 import java.util.List;
 
@@ -14,11 +13,6 @@ public class CreateVpcTask implements Task<CreateVpcTaskInput, CreateVpcTaskOutp
 
     public CreateVpcTask(AmazonEC2 ec2) {
         this.ec2 = ec2;
-    }
-
-    @Override
-    public boolean supports(TaskInput input) {
-        return input instanceof CreateVpcTaskInput;
     }
 
     @Override

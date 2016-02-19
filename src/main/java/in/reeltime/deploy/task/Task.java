@@ -10,14 +10,6 @@ package in.reeltime.deploy.task;
 public interface Task<I extends TaskInput, O extends TaskOutput> {
 
     /**
-     * Determines if the task supports the provided {@link TaskInput}.
-     *
-     * @param input The potential task input.
-     * @return {@code true} if the input is supported; otherwise {@code false}.
-     */
-    boolean supports(TaskInput input);
-
-    /**
      * This performs the work of the task. It is expected to
      * take the provided input, process it and return an appropriate output.
      *

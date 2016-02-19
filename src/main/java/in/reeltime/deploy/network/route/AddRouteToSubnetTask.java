@@ -4,7 +4,6 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.task.Task;
 import in.reeltime.deploy.task.TaskException;
-import in.reeltime.deploy.task.TaskInput;
 
 import java.util.Iterator;
 import java.util.List;
@@ -15,11 +14,6 @@ public class AddRouteToSubnetTask implements Task<AddRouteToSubnetTaskInput, Add
 
     public AddRouteToSubnetTask(AmazonEC2 ec2) {
         this.ec2 = ec2;
-    }
-
-    @Override
-    public boolean supports(TaskInput input) {
-        return input instanceof AddRouteToSubnetTaskInput;
     }
 
     @Override

@@ -3,7 +3,6 @@ package in.reeltime.deploy.network.gateway;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.task.Task;
-import in.reeltime.deploy.task.TaskInput;
 
 public class AddInternetGatewayToVpcTask implements Task<AddInternetGatewayToVpcTaskInput, AddInternetGatewayToVpcTaskOutput> {
 
@@ -11,11 +10,6 @@ public class AddInternetGatewayToVpcTask implements Task<AddInternetGatewayToVpc
 
     public AddInternetGatewayToVpcTask(AmazonEC2 ec2) {
         this.ec2 = ec2;
-    }
-
-    @Override
-    public boolean supports(TaskInput input) {
-        return input instanceof AddInternetGatewayToVpcTaskInput;
     }
 
     @Override
