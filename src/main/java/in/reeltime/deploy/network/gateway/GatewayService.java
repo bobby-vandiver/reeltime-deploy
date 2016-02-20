@@ -2,24 +2,19 @@ package in.reeltime.deploy.network.gateway;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
-import in.reeltime.deploy.task.Task;
 
-public class AddInternetGatewayToVpcTask implements Task<AddInternetGatewayToVpcTaskInput, AddInternetGatewayToVpcTaskOutput> {
+public class GatewayService {
 
     private final AmazonEC2 ec2;
 
-    public AddInternetGatewayToVpcTask(AmazonEC2 ec2) {
+    public GatewayService(AmazonEC2 ec2) {
         this.ec2 = ec2;
     }
 
-    @Override
-    public AddInternetGatewayToVpcTaskOutput execute(AddInternetGatewayToVpcTaskInput input) {
-        Vpc vpc = input.getVpc();
-
+    public InternetGateway addInternetGateway(Vpc vpc) {
         InternetGateway internetGateway = createInternetGateway();
         attachGatewayToVpc(internetGateway, vpc);
-
-        return new AddInternetGatewayToVpcTaskOutput(internetGateway);
+        return internetGateway;
     }
 
     private InternetGateway createInternetGateway() {

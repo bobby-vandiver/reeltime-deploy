@@ -1,6 +1,8 @@
 package in.reeltime.deploy;
 
-import in.reeltime.deploy.task.TaskRunner;
+import in.reeltime.deploy.factory.ServiceFactory;
+import in.reeltime.deploy.network.Network;
+import in.reeltime.deploy.network.NetworkService;
 import org.apache.commons.cli.*;
 
 public class Application {
@@ -22,8 +24,12 @@ public class Application {
             System.out.println("environment name = " + environmentName);
             System.out.println("removeExistingResources = " + removeExistingResources);
 
-            TaskRunner runner = new TaskRunner();
-            runner.run();
+            ServiceFactory serviceFactory = new ServiceFactory(environmentName);
+
+            NetworkService networkService = serviceFactory.networkService();
+            Network network = networkService.setupNetwork();
+
+            System.out.println("Success!");
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();

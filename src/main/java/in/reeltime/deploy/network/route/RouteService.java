@@ -2,25 +2,19 @@ package in.reeltime.deploy.network.route;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
-import in.reeltime.deploy.task.Task;
 
-public class CreateRouteTableForSubnetTask implements Task<CreateRouteTableForSubnetTaskInput, CreateRouteTableForSubnetTaskOutput> {
+public class RouteService {
 
     private final AmazonEC2 ec2;
 
-    public CreateRouteTableForSubnetTask(AmazonEC2 ec2) {
+    public RouteService(AmazonEC2 ec2) {
         this.ec2 = ec2;
     }
 
-    @Override
-    public CreateRouteTableForSubnetTaskOutput execute(CreateRouteTableForSubnetTaskInput input) {
-        Vpc vpc = input.getVpc();
-        Subnet subnet = input.getSubnet();
-
+    public RouteTable createRouteTable(Vpc vpc, Subnet subnet) {
         RouteTable routeTable = createRouteTable(vpc);
         associateRouteTableWithSubnet(routeTable, subnet);
-
-        return new CreateRouteTableForSubnetTaskOutput(routeTable);
+        return routeTable;
     }
 
     private RouteTable createRouteTable(Vpc vpc) {
@@ -42,5 +36,22 @@ public class CreateRouteTableForSubnetTask implements Task<CreateRouteTableForSu
                 .withSubnetId(subnetId);
 
         ec2.associateRouteTable(request);
+    }
+
+    public void addRouteToRouteTable(RouteTable routeTable, String cidrBlock, String gatewayId) {
+        String routeTableId = routeTable.getRouteTableId();
+
+        CreateRouteRequest request = new CreateRouteRequest()
+                .withGatewayId(gatewayId)
+                .withDestinationCidrBlock(cidrBlock)
+                .withRouteTableId(routeTableId);
+
+        CreateRouteResult result = ec2.createRoute(request);
+
+        if (!result.isReturn()) {
+            String message = String.format("Failed to create route: routeTableId = %s, cidrBlock = %s, gatewayId = %s",
+                    routeTableId, cidrBlock, gatewayId);
+            throw new IllegalStateException(message);
+        }
     }
 }
