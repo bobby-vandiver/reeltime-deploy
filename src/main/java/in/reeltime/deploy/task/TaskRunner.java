@@ -36,6 +36,7 @@ public class TaskRunner {
         InternetGateway internetGateway = addInternetGatewayToVpc(vpc);
         addRouteToRouteTable(publicRouteTable, "0.0.0.0/0", internetGateway.getInternetGatewayId());
 
+        // TODO: Need private subnets in at least two availability zones to include in an RDS DB subnet group
         Subnet privateSubnet = addSubnetToVpc(vpc, "private", "10.0.1.0/24");
         RouteTable privateRouteTable = createRouteTableForSubnet(vpc, privateSubnet);
     }
