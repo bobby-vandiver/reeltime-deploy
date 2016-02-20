@@ -1,5 +1,6 @@
 package in.reeltime.deploy.network;
 
+import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.google.common.collect.ImmutableList;
@@ -14,10 +15,17 @@ public class Network {
     private final List<Subnet> applicationSubnets;
     private final List<Subnet> databaseSubnets;
 
+    private final SecurityGroup applicationSecurityGroup;
+    private final SecurityGroup databaseSecurityGroup;
+
     private Network(Builder builder) {
         this.vpc = builder.vpc;
+
         this.applicationSubnets = ImmutableList.copyOf(builder.applicationSubnets);
         this.databaseSubnets = ImmutableList.copyOf(builder.databaseSubnets);
+
+        this.applicationSecurityGroup = builder.applicationSecurityGroup;
+        this.databaseSecurityGroup = builder.databaseSecurityGroup;
     }
 
     public Vpc getVpc() {
@@ -32,11 +40,22 @@ public class Network {
         return databaseSubnets;
     }
 
+    public SecurityGroup getApplicationSecurityGroup() {
+        return applicationSecurityGroup;
+    }
+
+    public SecurityGroup getDatabaseSecurityGroup() {
+        return databaseSecurityGroup;
+    }
+
     public static class Builder {
         private Vpc vpc;
 
         private List<Subnet> applicationSubnets;
         private List<Subnet> databaseSubnets;
+
+        private SecurityGroup applicationSecurityGroup;
+        private SecurityGroup databaseSecurityGroup;
 
         public Builder() {
             applicationSubnets = Lists.newArrayList();
@@ -55,6 +74,16 @@ public class Network {
 
         Builder withDatabaseSubnet(Subnet subnet) {
             databaseSubnets.add(subnet);
+            return this;
+        }
+
+        Builder withApplicationSecurityGroup(SecurityGroup securityGroup) {
+            applicationSecurityGroup = securityGroup;
+            return this;
+        }
+
+        Builder withDatabaseSecurityGroup(SecurityGroup securityGroup) {
+            databaseSecurityGroup = securityGroup;
             return this;
         }
 

@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.network.gateway.GatewayService;
 import in.reeltime.deploy.network.route.RouteService;
+import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
 import in.reeltime.deploy.network.vpc.VpcService;
 
@@ -21,13 +22,16 @@ public class NetworkService {
 
     private final GatewayService gatewayService;
 
+    private final SecurityGroupService securityGroupService;
+
     public NetworkService(AmazonEC2NameService nameService, VpcService vpcService, SubnetService subnetService,
-                          RouteService routeService, GatewayService gatewayService) {
+                          RouteService routeService, GatewayService gatewayService, SecurityGroupService securityGroupService) {
         this.nameService = nameService;
         this.vpcService = vpcService;
         this.subnetService = subnetService;
         this.routeService = routeService;
         this.gatewayService = gatewayService;
+        this.securityGroupService = securityGroupService;
     }
 
     public Network setupNetwork() {
@@ -64,11 +68,22 @@ public class NetworkService {
         RouteTable privateRouteTable2 = routeService.createRouteTable(vpc, privateSubnet2);
         nameService.setNameTag(RouteTable.class, privateRouteTable2.getRouteTableId(), "private-2");
 
+        String applicationSecurityGroupName = nameService.getNameForResource(SecurityGroup.class, "application");
+        SecurityGroup applicationSecurityGroup = securityGroupService.createSecurityGroup(vpc, applicationSecurityGroupName);
+
+        String databaseSecurityGroupName = nameService.getNameForResource(SecurityGroup.class, "database");
+        SecurityGroup databaseSecurityGroup = securityGroupService.createSecurityGroup(vpc, databaseSecurityGroupName);
+
+        databaseSecurityGroup = securityGroupService.addIngressRule(databaseSecurityGroup, applicationSecurityGroup, "tcp", 3306);
+        databaseSecurityGroup = securityGroupService.revokeAllEgressRules(databaseSecurityGroup);
+
         return new Network.Builder()
                 .withVpc(vpc)
                 .withApplicationSubnet(publicSubnet)
+                .withApplicationSecurityGroup(applicationSecurityGroup)
                 .withDatabaseSubnet(privateSubnet1)
                 .withDatabaseSubnet(privateSubnet2)
+                .withDatabaseSecurityGroup(databaseSecurityGroup)
                 .build();
     }
 }

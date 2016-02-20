@@ -2,10 +2,6 @@ package in.reeltime.deploy.factory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.rds.AmazonRDS;
-import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
-import com.amazonaws.services.rds.model.DescribeDBParameterGroupsResult;
-import com.amazonaws.services.rds.model.DescribeDBSecurityGroupsResult;
-import com.amazonaws.services.rds.model.DescribeOptionGroupsResult;
 import in.reeltime.deploy.aws.AwsClientFactory;
 import in.reeltime.deploy.database.DatabaseService;
 import in.reeltime.deploy.database.subnet.SubnetGroupService;
@@ -14,6 +10,7 @@ import in.reeltime.deploy.name.NameService;
 import in.reeltime.deploy.network.NetworkService;
 import in.reeltime.deploy.network.gateway.GatewayService;
 import in.reeltime.deploy.network.route.RouteService;
+import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
 import in.reeltime.deploy.network.vpc.VpcService;
 
@@ -39,8 +36,9 @@ public class ServiceFactory {
         SubnetService subnetService = new SubnetService(ec2);
         RouteService routeService = new RouteService(ec2);
         GatewayService gatewayService = new GatewayService(ec2);
+        SecurityGroupService securityGroupService = new SecurityGroupService(ec2);
 
-        return new NetworkService(nameService, vpcService, subnetService, routeService, gatewayService);
+        return new NetworkService(nameService, vpcService, subnetService, routeService, gatewayService, securityGroupService);
     }
 
     public DatabaseService databaseService() {

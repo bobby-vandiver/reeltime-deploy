@@ -12,6 +12,7 @@ public class NameService {
             .put(Vpc.class, "%s-vpc")
             .put(Subnet.class, "%s-subnet")
             .put(RouteTable.class, "%s-route-table")
+            .put(SecurityGroup.class, "%s-security-group")
             .put(DBSubnetGroup.class, "%s-db-subnet-group")
             .build();
 

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class SubnetGroupService {
 
-    private static final String DESCRIPTION_FORMAT = "DBSubnetGroup for environment: %s";
+    private static final String DESCRIPTION_FORMAT = "DBSubnetGroup: %s";
 
     private final AmazonRDS rds;
 
