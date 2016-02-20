@@ -17,15 +17,20 @@ public class AddSubnetToVpcTask implements Task<AddSubnetToVpcTaskInput, AddSubn
 
     @Override
     public AddSubnetToVpcTaskOutput execute(AddSubnetToVpcTaskInput input) {
-        Subnet subnet = createSubnet(input.getVpc(), input.getCidrBlock());
+        Subnet subnet = createSubnet(input.getVpc(), input.getAvailabilityZone(), input.getCidrBlock());
         setSubnetName(subnet, input.getName());
         return new AddSubnetToVpcTaskOutput(subnet);
     }
 
-    private Subnet createSubnet(Vpc vpc, String cidrBlock) {
+    private Subnet createSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
         String vpcId = vpc.getVpcId();
+        String zoneName = availabilityZone.getZoneName();
 
-        CreateSubnetRequest request = new CreateSubnetRequest(vpcId, cidrBlock);
+        CreateSubnetRequest request = new CreateSubnetRequest()
+                .withVpcId(vpcId)
+                .withAvailabilityZone(zoneName)
+                .withCidrBlock(cidrBlock);
+
         CreateSubnetResult result = ec2.createSubnet(request);
 
         return result.getSubnet();
