@@ -1,5 +1,7 @@
 package in.reeltime.deploy;
 
+import in.reeltime.deploy.database.Database;
+import in.reeltime.deploy.database.DatabaseService;
 import in.reeltime.deploy.factory.ServiceFactory;
 import in.reeltime.deploy.network.Network;
 import in.reeltime.deploy.network.NetworkService;
@@ -28,6 +30,9 @@ public class Application {
 
             NetworkService networkService = serviceFactory.networkService();
             Network network = networkService.setupNetwork();
+
+            DatabaseService databaseService = serviceFactory.databaseService();
+            Database database = databaseService.setupDatabase(network);
 
             System.out.println("Success!");
         }

@@ -1,7 +1,7 @@
 package in.reeltime.deploy.network;
 
 import com.amazonaws.services.ec2.model.*;
-import in.reeltime.deploy.name.NameService;
+import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.network.gateway.GatewayService;
 import in.reeltime.deploy.network.route.RouteService;
 import in.reeltime.deploy.network.subnet.SubnetService;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class NetworkService {
 
-    private final NameService nameService;
+    private final AmazonEC2NameService nameService;
 
     private final VpcService vpcService;
 
@@ -21,7 +21,7 @@ public class NetworkService {
 
     private final GatewayService gatewayService;
 
-    public NetworkService(NameService nameService, VpcService vpcService, SubnetService subnetService,
+    public NetworkService(AmazonEC2NameService nameService, VpcService vpcService, SubnetService subnetService,
                           RouteService routeService, GatewayService gatewayService) {
         this.nameService = nameService;
         this.vpcService = vpcService;
@@ -66,9 +66,9 @@ public class NetworkService {
 
         return new Network.Builder()
                 .withVpc(vpc)
-                .withPublicSubnet(publicSubnet, publicRouteTable)
-                .withPrivateSubnet1(privateSubnet1, privateRouteTable1)
-                .withPrivateSubnet2(privateSubnet2, privateRouteTable2)
+                .withApplicationSubnet(publicSubnet)
+                .withDatabaseSubnet(privateSubnet1)
+                .withDatabaseSubnet(privateSubnet2)
                 .build();
     }
 }

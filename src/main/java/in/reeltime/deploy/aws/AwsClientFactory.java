@@ -4,6 +4,8 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.rds.AmazonRDSClient;
 import in.reeltime.deploy.util.SystemPropertyUtil;
 
 public class AwsClientFactory {
@@ -20,6 +22,10 @@ public class AwsClientFactory {
 
     public AmazonEC2 ec2() {
         return new AmazonEC2Client(credentials);
+    }
+
+    public AmazonRDS rds() {
+        return new AmazonRDSClient(credentials);
     }
 
     private static AWSCredentials loadCredentials() {
