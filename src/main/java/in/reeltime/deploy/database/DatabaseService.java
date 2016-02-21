@@ -27,7 +27,7 @@ public class DatabaseService {
         DBSubnetGroup subnetGroup = databaseSubnetGroupService.createSubnetGroup(groupName, network.getDatabaseSubnets());
 
         String identifier = nameService.getNameForResource(DBInstance.class, "identifier");
-        String databaseName = nameService.getNameForResource(DBInstance.class, "database-name");
+        String databaseName = nameService.getNameForResource(Database.class);
 
         SecurityGroup securityGroup = network.getDatabaseSecurityGroup();
 

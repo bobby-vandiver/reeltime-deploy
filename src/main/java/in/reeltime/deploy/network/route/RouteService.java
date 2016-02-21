@@ -2,6 +2,7 @@ package in.reeltime.deploy.network.route;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
+import in.reeltime.deploy.log.Logger;
 
 public class RouteService {
 
@@ -23,6 +24,7 @@ public class RouteService {
         CreateRouteTableRequest request = new CreateRouteTableRequest()
                 .withVpcId(vpcId);
 
+        Logger.info("Creating route table in vpc [%s]", vpc);
         CreateRouteTableResult result = ec2.createRouteTable(request);
         return result.getRouteTable();
     }
@@ -35,6 +37,7 @@ public class RouteService {
                 .withRouteTableId(routeTableId)
                 .withSubnetId(subnetId);
 
+        Logger.info("Associating route table [%s] with subnet [%s]", routeTableId, subnetId);
         ec2.associateRouteTable(request);
     }
 

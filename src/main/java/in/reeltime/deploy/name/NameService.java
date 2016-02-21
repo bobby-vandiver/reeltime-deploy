@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.model.*;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
 import com.google.common.collect.ImmutableMap;
+import in.reeltime.deploy.database.Database;
 
 import java.util.Map;
 
@@ -14,6 +15,7 @@ public class NameService {
             .put(Subnet.class, "%s-subnet")
             .put(RouteTable.class, "%s-route-table")
             .put(SecurityGroup.class, "%s-security-group")
+            .put(Database.class, "%s")
             .put(DBInstance.class, "%s-db-instance")
             .put(DBSubnetGroup.class, "%s-db-subnet-group")
             .build();

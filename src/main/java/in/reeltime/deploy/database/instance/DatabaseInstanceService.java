@@ -4,15 +4,28 @@ import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.*;
 import com.google.common.collect.Lists;
+import in.reeltime.deploy.condition.ConditionalService;
+import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 
 public class DatabaseInstanceService {
 
-    private final AmazonRDS rds;
+    private static final long WAITING_POLLING_INTERVAL_SECS = 30;
 
-    public DatabaseInstanceService(AmazonRDS rds) {
+    private static final String WAITING_FOR_AVAILABLE_STATUS_FORMAT =
+            "Waiting for database instance [%s] to become available";
+
+    private static final String WAITING_FOR_AVAILABLE_FAILED_FORMAT =
+            "Database instance [%s] did not become available during the expected time";
+
+
+    private final AmazonRDS rds;
+    private final ConditionalService conditionalService;
+
+    public DatabaseInstanceService(AmazonRDS rds, ConditionalService conditionalService) {
         this.rds = rds;
+        this.conditionalService = conditionalService;
     }
 
     public DBInstance createInstance(String identifier, String databaseName,
@@ -35,6 +48,7 @@ public class DatabaseInstanceService {
                 .withStorageEncrypted(false)
                 .withVpcSecurityGroupIds(securityGroupIds);
 
+        Logger.info("Creating database instance with identifier [%s] and database [%s]", identifier, databaseName);
         return rds.createDBInstance(request);
     }
 
@@ -56,11 +70,13 @@ public class DatabaseInstanceService {
     }
 
     public DBInstance waitForInstance(DBInstance instance) {
-        String identifer = instance.getDBInstanceIdentifier();
+        String identifier = instance.getDBInstanceIdentifier();
 
-        while (!checkInstanceStatus(identifer, "available")) {
-            // wait
-        }
+        String statusMessage = String.format(WAITING_FOR_AVAILABLE_STATUS_FORMAT, identifier);
+        String failureMessage = String.format(WAITING_FOR_AVAILABLE_FAILED_FORMAT, identifier);
+
+        conditionalService.waitForCondition(statusMessage, failureMessage, WAITING_POLLING_INTERVAL_SECS,
+                () -> checkInstanceStatus(identifier, "available"));
 
         return refreshInstance(instance);
     }
@@ -71,7 +87,7 @@ public class DatabaseInstanceService {
     }
 
     private DBInstance refreshInstance(DBInstance instance) {
-        String identifer = instance.getDBInstanceIdentifier();
-        return getInstance(identifer);
+        String identifier = instance.getDBInstanceIdentifier();
+        return getInstance(identifier);
     }
 }

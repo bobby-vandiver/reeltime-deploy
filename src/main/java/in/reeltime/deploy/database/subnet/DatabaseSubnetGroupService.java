@@ -5,6 +5,7 @@ import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.CreateDBSubnetGroupRequest;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
 import com.google.common.collect.Lists;
+import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class DatabaseSubnetGroupService {
                 .withDBSubnetGroupDescription(description)
                 .withSubnetIds(subnetIds);
 
+        Logger.info("Creating database subnet group [%s]", groupName);
         return rds.createDBSubnetGroup(request);
     }
 

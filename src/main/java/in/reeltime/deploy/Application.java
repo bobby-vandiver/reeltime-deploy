@@ -3,6 +3,7 @@ package in.reeltime.deploy;
 import in.reeltime.deploy.database.Database;
 import in.reeltime.deploy.database.DatabaseService;
 import in.reeltime.deploy.factory.ServiceFactory;
+import in.reeltime.deploy.log.Logger;
 import in.reeltime.deploy.network.Network;
 import in.reeltime.deploy.network.NetworkService;
 import org.apache.commons.cli.*;
@@ -23,11 +24,11 @@ public class Application {
             String environmentName = line.getOptionValue("name");
             boolean removeExistingResources = line.hasOption("rm");
 
-            System.out.println("environment name = " + environmentName);
-            System.out.println("removeExistingResources = " + removeExistingResources);
+            Logger.info("environment name = " + environmentName);
+            Logger.info("removeExistingResources = " + removeExistingResources);
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
-//
+
             NetworkService networkService = serviceFactory.networkService();
             Network network = networkService.setupNetwork();
 

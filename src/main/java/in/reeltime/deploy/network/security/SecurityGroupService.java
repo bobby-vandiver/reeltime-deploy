@@ -2,6 +2,7 @@ package in.reeltime.deploy.network.security;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
+import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 
@@ -49,6 +50,8 @@ public class SecurityGroupService {
                 .withGroupName(groupName)
                 .withDescription(description);
 
+        Logger.info("Creating security group [%s] in vpc [%s]", groupName, vpcId);
+
         CreateSecurityGroupResult result = ec2.createSecurityGroup(request);
         String groupId = result.getGroupId();
 
@@ -85,6 +88,8 @@ public class SecurityGroupService {
                 .withGroupId(toGroupId)
                 .withIpPermissions(permission);
 
+        Logger.info("Adding ingress rule to security group [%s] with permission [%s]", toGroupId, permission);
+
         ec2.authorizeSecurityGroupIngress(request);
         return refreshSecurityGroup(toGroup);
     }
@@ -96,6 +101,8 @@ public class SecurityGroupService {
         RevokeSecurityGroupEgressRequest request = new RevokeSecurityGroupEgressRequest()
                 .withGroupId(groupId)
                 .withIpPermissions(egressRules);
+
+        Logger.info("Revoking all egress rules for security group [%s]", groupId);
 
         ec2.revokeSecurityGroupEgress(request);
         return refreshSecurityGroup(securityGroup);

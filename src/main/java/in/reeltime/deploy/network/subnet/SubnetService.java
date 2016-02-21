@@ -2,6 +2,7 @@ package in.reeltime.deploy.network.subnet;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
+import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class SubnetService {
                 .withAvailabilityZone(zoneName)
                 .withCidrBlock(cidrBlock);
 
+        Logger.info("Creating subnet in vpc [%s] with availability zone [%s] and cidr block [%s]", vpcId, zoneName, cidrBlock);
         CreateSubnetResult result = ec2.createSubnet(request);
 
         return result.getSubnet();

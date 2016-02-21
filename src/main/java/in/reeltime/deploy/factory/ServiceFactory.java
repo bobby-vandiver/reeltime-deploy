@@ -5,6 +5,7 @@ import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import in.reeltime.deploy.aws.AwsClientFactory;
+import in.reeltime.deploy.condition.ConditionalService;
 import in.reeltime.deploy.database.DatabaseService;
 import in.reeltime.deploy.database.instance.DatabaseInstanceService;
 import in.reeltime.deploy.database.subnet.DatabaseSubnetGroupService;
@@ -48,9 +49,10 @@ public class ServiceFactory {
         AmazonRDS rds = awsClientFactory.rds();
 
         NameService nameService = new NameService(environmentName);
+        ConditionalService conditionalService = new ConditionalService();
 
         DatabaseSubnetGroupService databaseSubnetGroupService = new DatabaseSubnetGroupService(rds);
-        DatabaseInstanceService databaseInstanceService = new DatabaseInstanceService(rds);
+        DatabaseInstanceService databaseInstanceService = new DatabaseInstanceService(rds, conditionalService);
 
         return new DatabaseService(nameService, databaseSubnetGroupService, databaseInstanceService);
     }
