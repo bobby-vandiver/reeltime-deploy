@@ -1,6 +1,7 @@
 package in.reeltime.deploy.name;
 
 import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
 import com.google.common.collect.ImmutableMap;
 
@@ -13,6 +14,7 @@ public class NameService {
             .put(Subnet.class, "%s-subnet")
             .put(RouteTable.class, "%s-route-table")
             .put(SecurityGroup.class, "%s-security-group")
+            .put(DBInstance.class, "%s-db-instance")
             .put(DBSubnetGroup.class, "%s-db-subnet-group")
             .build();
 

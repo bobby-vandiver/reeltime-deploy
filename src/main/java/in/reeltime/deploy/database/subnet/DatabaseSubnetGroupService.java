@@ -8,13 +8,13 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
-public class SubnetGroupService {
+public class DatabaseSubnetGroupService {
 
     private static final String DESCRIPTION_FORMAT = "DBSubnetGroup: %s";
 
     private final AmazonRDS rds;
 
-    public SubnetGroupService(AmazonRDS rds) {
+    public DatabaseSubnetGroupService(AmazonRDS rds) {
         this.rds = rds;
     }
 

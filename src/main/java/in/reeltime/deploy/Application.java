@@ -27,12 +27,12 @@ public class Application {
             System.out.println("removeExistingResources = " + removeExistingResources);
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
-
+//
             NetworkService networkService = serviceFactory.networkService();
             Network network = networkService.setupNetwork();
 
-//            DatabaseService databaseService = serviceFactory.databaseService();
-//            Database database = databaseService.setupDatabase(network);
+            DatabaseService databaseService = serviceFactory.databaseService();
+            Database database = databaseService.setupDatabase(network);
 
             System.out.println("Success!");
         }

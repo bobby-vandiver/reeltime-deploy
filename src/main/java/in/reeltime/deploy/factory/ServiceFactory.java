@@ -2,9 +2,12 @@ package in.reeltime.deploy.factory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
+import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import in.reeltime.deploy.aws.AwsClientFactory;
 import in.reeltime.deploy.database.DatabaseService;
-import in.reeltime.deploy.database.subnet.SubnetGroupService;
+import in.reeltime.deploy.database.instance.DatabaseInstanceService;
+import in.reeltime.deploy.database.subnet.DatabaseSubnetGroupService;
 import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.name.NameService;
 import in.reeltime.deploy.network.NetworkService;
@@ -43,9 +46,12 @@ public class ServiceFactory {
 
     public DatabaseService databaseService() {
         AmazonRDS rds = awsClientFactory.rds();
+
         NameService nameService = new NameService(environmentName);
 
-        SubnetGroupService subnetGroupService = new SubnetGroupService(rds);
-        return new DatabaseService(nameService, subnetGroupService);
+        DatabaseSubnetGroupService databaseSubnetGroupService = new DatabaseSubnetGroupService(rds);
+        DatabaseInstanceService databaseInstanceService = new DatabaseInstanceService(rds);
+
+        return new DatabaseService(nameService, databaseSubnetGroupService, databaseInstanceService);
     }
 }
