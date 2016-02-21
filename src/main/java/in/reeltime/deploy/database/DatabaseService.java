@@ -1,5 +1,6 @@
 package in.reeltime.deploy.database;
 
+import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
 import in.reeltime.deploy.database.instance.DatabaseInstanceService;
@@ -25,8 +26,13 @@ public class DatabaseService {
         String groupName = nameService.getNameForResource(DBSubnetGroup.class);
         DBSubnetGroup subnetGroup = databaseSubnetGroupService.createSubnetGroup(groupName, network.getDatabaseSubnets());
 
-        String identifier = nameService.getNameForResource(DBInstance.class);
-        DBInstance instance = databaseInstanceService.createInstance(identifier, network.getDatabaseSecurityGroup(), subnetGroup);
+        String identifier = nameService.getNameForResource(DBInstance.class, "identifier");
+        String databaseName = nameService.getNameForResource(DBInstance.class, "database-name");
+
+        SecurityGroup securityGroup = network.getDatabaseSecurityGroup();
+
+        DBInstance instance = databaseInstanceService.createInstance(identifier, databaseName, securityGroup, subnetGroup);
+        instance = databaseInstanceService.waitForInstance(instance);
 
         return null;
     }
