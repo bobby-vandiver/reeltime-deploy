@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.log.Logger;
 
+import java.util.Collection;
 import java.util.List;
 
 public class SecurityGroupService {
@@ -61,6 +62,24 @@ public class SecurityGroupService {
             throw new IllegalStateException("The security group found was not the one created");
         }
         return securityGroup;
+    }
+
+    public SecurityGroup addIngressRule(SecurityGroup securityGroup, Collection<String> inboundIpRanges, Integer port) {
+        String groupId = securityGroup.getGroupId();
+
+        IpPermission permission = new IpPermission()
+                .withIpRanges(inboundIpRanges)
+                .withToPort(port)
+                .withFromPort(port);
+
+        AuthorizeSecurityGroupIngressRequest request = new AuthorizeSecurityGroupIngressRequest()
+                .withGroupId(groupId)
+                .withIpPermissions(permission);
+
+        Logger.info("Adding ingress rule to security group [%s] with permission [%s]", groupId, permission);
+
+        ec2.authorizeSecurityGroupIngress(request);
+        return refreshSecurityGroup(securityGroup);
     }
 
     public SecurityGroup addIngressRule(SecurityGroup toGroup, SecurityGroup fromGroup, String protocol, Integer port) {
