@@ -1,0 +1,24 @@
+{
+    "Version":"2012-10-17",
+    "Statement":[
+        {
+            "Sid":"1",
+            "Effect":"Allow",
+            "Action":[
+                "elastictranscoder:ListPipelines",
+                "elastictranscoder:CreateJob",
+                "elastictranscoder:ReadJob"
+            ],
+            "Resource":"*"
+        },
+        {
+            "Sid":"2",
+            "Effect":"Deny",
+            "Action":[
+                "elastictranscoder:Delete*",
+                "elastictranscoder:CancelJob"
+            ],
+            "Resource":"*"
+        }
+    ]
+}
