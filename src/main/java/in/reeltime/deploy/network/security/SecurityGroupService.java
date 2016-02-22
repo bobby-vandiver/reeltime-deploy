@@ -64,11 +64,12 @@ public class SecurityGroupService {
         return securityGroup;
     }
 
-    public SecurityGroup addIngressRule(SecurityGroup securityGroup, Collection<String> inboundIpRanges, Integer port) {
+    public SecurityGroup addIngressRule(SecurityGroup securityGroup, Collection<String> inboundIpRanges, String protocol, Integer port) {
         String groupId = securityGroup.getGroupId();
 
         IpPermission permission = new IpPermission()
                 .withIpRanges(inboundIpRanges)
+                .withIpProtocol(protocol)
                 .withToPort(port)
                 .withFromPort(port);
 

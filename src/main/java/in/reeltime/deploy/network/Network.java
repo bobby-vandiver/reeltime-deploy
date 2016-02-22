@@ -18,6 +18,8 @@ public class Network {
     private final SecurityGroup applicationSecurityGroup;
     private final SecurityGroup databaseSecurityGroup;
 
+    private final List<SecurityGroup> snsSecurityGroups;
+
     private Network(Builder builder) {
         this.vpc = builder.vpc;
 
@@ -26,6 +28,8 @@ public class Network {
 
         this.applicationSecurityGroup = builder.applicationSecurityGroup;
         this.databaseSecurityGroup = builder.databaseSecurityGroup;
+
+        this.snsSecurityGroups = ImmutableList.copyOf(builder.snsSecurityGroups);
     }
 
     public Vpc getVpc() {
@@ -48,6 +52,10 @@ public class Network {
         return databaseSecurityGroup;
     }
 
+    public List<SecurityGroup> getSnsSecurityGroups() {
+        return snsSecurityGroups;
+    }
+
     public static class Builder {
         private Vpc vpc;
 
@@ -56,6 +64,8 @@ public class Network {
 
         private SecurityGroup applicationSecurityGroup;
         private SecurityGroup databaseSecurityGroup;
+
+        private List<SecurityGroup> snsSecurityGroups;
 
         public Builder() {
             applicationSubnets = Lists.newArrayList();
@@ -84,6 +94,11 @@ public class Network {
 
         Builder withDatabaseSecurityGroup(SecurityGroup securityGroup) {
             databaseSecurityGroup = securityGroup;
+            return this;
+        }
+
+        Builder withSnsSecurityGroups(List<SecurityGroup> securityGroups) {
+            this.snsSecurityGroups = securityGroups;
             return this;
         }
 

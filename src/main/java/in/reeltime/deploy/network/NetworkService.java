@@ -4,13 +4,16 @@ import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.network.gateway.GatewayService;
 import in.reeltime.deploy.network.route.RouteService;
+import in.reeltime.deploy.network.security.IpAddressService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
 import in.reeltime.deploy.network.vpc.VpcService;
+import in.reeltime.deploy.notification.NotificationService;
 
 import java.util.List;
 
 public class NetworkService {
+
 
     private final AmazonEC2NameService nameService;
 
@@ -24,14 +27,18 @@ public class NetworkService {
 
     private final SecurityGroupService securityGroupService;
 
+    private final NotificationService notificationService;
+
     public NetworkService(AmazonEC2NameService nameService, VpcService vpcService, SubnetService subnetService,
-                          RouteService routeService, GatewayService gatewayService, SecurityGroupService securityGroupService) {
+                          RouteService routeService, GatewayService gatewayService,
+                          SecurityGroupService securityGroupService, NotificationService notificationService) {
         this.nameService = nameService;
         this.vpcService = vpcService;
         this.subnetService = subnetService;
         this.routeService = routeService;
         this.gatewayService = gatewayService;
         this.securityGroupService = securityGroupService;
+        this.notificationService = notificationService;
     }
 
     public Network setupNetwork() {
@@ -77,6 +84,8 @@ public class NetworkService {
         databaseSecurityGroup = securityGroupService.addIngressRule(databaseSecurityGroup, applicationSecurityGroup, "tcp", 3306);
         databaseSecurityGroup = securityGroupService.revokeAllEgressRules(databaseSecurityGroup);
 
+        List<SecurityGroup> snsSecurityGroups = notificationService.addSecurityGroupsForSNS(vpc);
+
         return new Network.Builder()
                 .withVpc(vpc)
                 .withApplicationSubnet(publicSubnet)
@@ -84,6 +93,7 @@ public class NetworkService {
                 .withDatabaseSubnet(privateSubnet1)
                 .withDatabaseSubnet(privateSubnet2)
                 .withDatabaseSecurityGroup(databaseSecurityGroup)
+                .withSnsSecurityGroups(snsSecurityGroups)
                 .build();
     }
 }

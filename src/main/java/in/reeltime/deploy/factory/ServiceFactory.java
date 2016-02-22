@@ -14,9 +14,11 @@ import in.reeltime.deploy.name.NameService;
 import in.reeltime.deploy.network.NetworkService;
 import in.reeltime.deploy.network.gateway.GatewayService;
 import in.reeltime.deploy.network.route.RouteService;
+import in.reeltime.deploy.network.security.IpAddressService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
 import in.reeltime.deploy.network.vpc.VpcService;
+import in.reeltime.deploy.notification.NotificationService;
 
 public class ServiceFactory {
 
@@ -41,8 +43,10 @@ public class ServiceFactory {
         RouteService routeService = new RouteService(ec2);
         GatewayService gatewayService = new GatewayService(ec2);
         SecurityGroupService securityGroupService = new SecurityGroupService(ec2);
+        IpAddressService ipAddressService = new IpAddressService();
+        NotificationService notificationService = new NotificationService(ipAddressService, securityGroupService);
 
-        return new NetworkService(nameService, vpcService, subnetService, routeService, gatewayService, securityGroupService);
+        return new NetworkService(nameService, vpcService, subnetService, routeService, gatewayService, securityGroupService, notificationService);
     }
 
     public DatabaseService databaseService() {
