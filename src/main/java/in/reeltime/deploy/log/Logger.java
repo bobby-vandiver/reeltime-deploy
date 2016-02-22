@@ -23,6 +23,11 @@ public class Logger {
         log("WARN", message);
     }
 
+    public static void warn(String format, Object...args) {
+        String message = String.format(format, args);
+        log("WARN", message);
+    }
+
     public static void error(String message) {
         log("ERROR", message);
     }
