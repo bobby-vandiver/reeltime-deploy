@@ -1,11 +1,15 @@
 package in.reeltime.deploy.name;
 
 import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
 import com.amazonaws.services.s3.model.Bucket;
+import com.amazonaws.services.sns.model.Topic;
 import com.google.common.collect.ImmutableMap;
+import in.reeltime.deploy.access.role.RolePolicy;
 import in.reeltime.deploy.database.Database;
+import in.reeltime.deploy.transcoder.Transcoder;
 
 import java.util.Map;
 
@@ -20,6 +24,10 @@ public class NameService {
             .put(DBInstance.class, "%s-db-instance")
             .put(DBSubnetGroup.class, "%s-db-subnet-group")
             .put(Bucket.class, "%s-bucket")
+            .put(Transcoder.class, "%s-transcoder")
+            .put(Topic.class, "%s-topic")
+            .put(Role.class, "%s-role")
+            .put(RolePolicy.class, "%s-role-policy")
             .build();
 
     private final String environmentName;

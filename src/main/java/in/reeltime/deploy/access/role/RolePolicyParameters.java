@@ -1,7 +1,7 @@
 package in.reeltime.deploy.access.role;
 
 import com.amazonaws.services.s3.model.Bucket;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 
 import java.util.Map;
 
@@ -15,21 +15,25 @@ public class RolePolicyParameters {
 
     private final Bucket playlistsAndSegmentsBucketName;
 
-    // TODO: Need transcoder topic name
+    private final String transcoderTopicName;
 
-    public RolePolicyParameters(String awsAccountId, Bucket masterVideosBucket, Bucket thumbnailsBucket, Bucket playlistsAndSegmentsBucketName) {
+    public RolePolicyParameters(String awsAccountId, Bucket masterVideosBucket, Bucket thumbnailsBucket, Bucket playlistsAndSegmentsBucketName, String transcoderTopicName) {
         this.awsAccountId = awsAccountId;
         this.masterVideosBucket = masterVideosBucket;
         this.thumbnailsBucket = thumbnailsBucket;
         this.playlistsAndSegmentsBucketName = playlistsAndSegmentsBucketName;
+        this.transcoderTopicName = transcoderTopicName;
     }
 
     public Map<String, String> toMap() {
-        return new ImmutableMap.Builder<String, String>()
-                .put("awsAccountId", awsAccountId)
-                .put("masterVideosBucketName", masterVideosBucket.getName())
-                .put("thumbnailsBucketName", thumbnailsBucket.getName())
-                .put("playlistsAndSegmentsBucketName", playlistsAndSegmentsBucketName.getName())
-                .build();
+        Map<String, String> map = Maps.newHashMap();
+
+        map.put("awsAccountId", awsAccountId);
+        map.put("masterVideosBucketName", masterVideosBucket.getName());
+        map.put("thumbnailsBucketName", thumbnailsBucket.getName());
+        map.put("playlistsAndSegmentsBucketName", playlistsAndSegmentsBucketName.getName());
+        map.put("transcoderTopicName", transcoderTopicName);
+
+        return map;
     }
 }

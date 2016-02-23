@@ -2,6 +2,7 @@ package in.reeltime.deploy.notification.topic;
 
 import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.model.CreateTopicResult;
+import com.amazonaws.services.sns.model.Topic;
 
 public class TopicService {
 
@@ -11,8 +12,8 @@ public class TopicService {
         this.sns = sns;
     }
 
-    public String createTopic(String topicName) {
+    public Topic createTopic(String topicName) {
         CreateTopicResult result = sns.createTopic(topicName);
-        return result.getTopicArn();
+        return new Topic().withTopicArn(result.getTopicArn());
     }
 }

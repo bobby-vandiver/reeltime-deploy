@@ -15,7 +15,7 @@ import java.util.Map;
 public class RoleService {
 
     private static final String ROLE_FORMAT = "/roles/%s.json";
-    private static final String ROLE_POLICY_FORMAT = "/role-policies/%s.json";
+    private static final String ROLE_POLICY_FORMAT = "/role-policies/%s.json.template";
 
     private final AmazonIdentityManagement iam;
     private final ResourceService resourceService;
@@ -36,9 +36,9 @@ public class RoleService {
         return result.getRole();
     }
 
-    public Role addPolicy(Role role, String policyName, String policyDocumentName) {
+    public Role addPolicy(Role role, String policyName, String policyDocumentName, RolePolicyParameters parameters) {
         String roleName = role.getRoleName();
-        String policyDocument = getPolicyDocument(ROLE_POLICY_FORMAT, policyDocumentName);
+        String policyDocument = getPolicyDocument(ROLE_POLICY_FORMAT, policyDocumentName, parameters.toMap());
 
         PutRolePolicyRequest request = new PutRolePolicyRequest()
                 .withRoleName(roleName)

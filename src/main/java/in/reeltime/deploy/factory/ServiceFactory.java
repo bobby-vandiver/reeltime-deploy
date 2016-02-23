@@ -1,8 +1,13 @@
 package in.reeltime.deploy.factory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.sns.AmazonSNS;
+import in.reeltime.deploy.access.AccessService;
+import in.reeltime.deploy.access.profile.InstanceProfileService;
+import in.reeltime.deploy.access.role.RoleService;
 import in.reeltime.deploy.aws.AwsClientFactory;
 import in.reeltime.deploy.condition.ConditionalService;
 import in.reeltime.deploy.database.DatabaseService;
@@ -17,8 +22,11 @@ import in.reeltime.deploy.network.security.IpAddressService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
 import in.reeltime.deploy.network.vpc.VpcService;
+import in.reeltime.deploy.notification.topic.TopicService;
+import in.reeltime.deploy.resource.ResourceService;
 import in.reeltime.deploy.storage.StorageService;
 import in.reeltime.deploy.storage.bucket.BucketService;
+import in.reeltime.deploy.transcoder.TranscoderService;
 
 public class ServiceFactory {
 
@@ -70,5 +78,26 @@ public class ServiceFactory {
         BucketService bucketService = new BucketService(s3);
 
         return new StorageService(nameService, bucketService);
+    }
+
+    public TranscoderService transcoderService() {
+        AmazonSNS sns = awsClientFactory.sns();
+
+        NameService nameService = new NameService(environmentName);
+        TopicService topicService = new TopicService(sns);
+
+        return new TranscoderService(nameService, topicService);
+    }
+
+    public AccessService accessService() {
+        AmazonIdentityManagement iam = awsClientFactory.iam();
+
+        NameService nameService = new NameService(environmentName);
+        ResourceService resourceService = new ResourceService();
+
+        RoleService roleService = new RoleService(iam, resourceService);
+        InstanceProfileService instanceProfileService = new InstanceProfileService(iam);
+
+        return new AccessService(nameService, roleService, instanceProfileService);
     }
 }
