@@ -2,6 +2,7 @@ package in.reeltime.deploy.network.security;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
+import com.google.common.collect.Lists;
 import in.reeltime.deploy.log.Logger;
 
 import java.util.Collection;
@@ -11,10 +12,14 @@ public class SecurityGroupService {
 
     private static final String DESCRIPTION_FORMAT = "SecurityGroup: %s";
 
-    private final AmazonEC2 ec2;
+    private static final int MAX_IP_PERMISSIONS_PER_SECURITY_GROUP = 50;
 
-    public SecurityGroupService(AmazonEC2 ec2) {
+    private final AmazonEC2 ec2;
+    private final IpAddressService ipAddressService;
+
+    public SecurityGroupService(AmazonEC2 ec2, IpAddressService ipAddressService) {
         this.ec2 = ec2;
+        this.ipAddressService = ipAddressService;
     }
 
     public SecurityGroup getSecurityGroup(Vpc vpc, String groupName) {
@@ -62,6 +67,37 @@ public class SecurityGroupService {
             throw new IllegalStateException("The security group found was not the one created");
         }
         return securityGroup;
+    }
+
+    public List<SecurityGroup> createSecurityGroupsForAmazonServices(Vpc vpc) {
+        List<SecurityGroup> securityGroups = Lists.newArrayList();
+        List<String> amazonIpAddresses = ipAddressService.getAmazonIpAddresses();
+
+        int idx = 0;
+        int groupNumber = 1;
+
+        int addressesRemaining = amazonIpAddresses.size();
+
+        while (addressesRemaining > 0) {
+            List<String> ipAddresses;
+
+            if (addressesRemaining >= MAX_IP_PERMISSIONS_PER_SECURITY_GROUP) {
+                ipAddresses = amazonIpAddresses.subList(idx, idx + MAX_IP_PERMISSIONS_PER_SECURITY_GROUP);
+                addressesRemaining -= MAX_IP_PERMISSIONS_PER_SECURITY_GROUP;
+            }
+            else {
+                ipAddresses = amazonIpAddresses.subList(idx, idx + addressesRemaining);
+                addressesRemaining = 0;
+            }
+
+            SecurityGroup securityGroup = createSecurityGroup(vpc, "amazon-services-" + groupNumber);
+            securityGroup = addIngressRule(securityGroup, ipAddresses, "tcp", 80);
+
+            securityGroups.add(securityGroup);
+            groupNumber++;
+        }
+
+        return securityGroups;
     }
 
     public SecurityGroup addIngressRule(SecurityGroup securityGroup, Collection<String> inboundIpRanges, String protocol, Integer port) {

@@ -6,6 +6,8 @@ import in.reeltime.deploy.factory.ServiceFactory;
 import in.reeltime.deploy.log.Logger;
 import in.reeltime.deploy.network.Network;
 import in.reeltime.deploy.network.NetworkService;
+import in.reeltime.deploy.storage.Storage;
+import in.reeltime.deploy.storage.StorageService;
 import org.apache.commons.cli.*;
 
 public class Application {
@@ -29,11 +31,14 @@ public class Application {
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
-            NetworkService networkService = serviceFactory.networkService();
-            Network network = networkService.setupNetwork();
+//            NetworkService networkService = serviceFactory.networkService();
+//            Network network = networkService.setupNetwork();
 
 //            DatabaseService databaseService = serviceFactory.databaseService();
 //            Database database = databaseService.setupDatabase(network);
+
+//            StorageService storageService = serviceFactory.storageService();
+//            Storage storage = storageService.setupStorage();
 
             System.out.println("Success!");
         }

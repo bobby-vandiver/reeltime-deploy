@@ -2,8 +2,7 @@ package in.reeltime.deploy.factory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.rds.AmazonRDS;
-import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
+import com.amazonaws.services.s3.AmazonS3;
 import in.reeltime.deploy.aws.AwsClientFactory;
 import in.reeltime.deploy.condition.ConditionalService;
 import in.reeltime.deploy.database.DatabaseService;
@@ -18,7 +17,8 @@ import in.reeltime.deploy.network.security.IpAddressService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
 import in.reeltime.deploy.network.vpc.VpcService;
-import in.reeltime.deploy.notification.NotificationService;
+import in.reeltime.deploy.storage.StorageService;
+import in.reeltime.deploy.storage.bucket.BucketService;
 
 public class ServiceFactory {
 
@@ -39,14 +39,16 @@ public class ServiceFactory {
         AmazonEC2NameService nameService = new AmazonEC2NameService(environmentName, ec2);
 
         VpcService vpcService = new VpcService(ec2);
+
         SubnetService subnetService = new SubnetService(ec2);
         RouteService routeService = new RouteService(ec2);
-        GatewayService gatewayService = new GatewayService(ec2);
-        SecurityGroupService securityGroupService = new SecurityGroupService(ec2);
-        IpAddressService ipAddressService = new IpAddressService();
-        NotificationService notificationService = new NotificationService(ipAddressService, securityGroupService);
 
-        return new NetworkService(nameService, vpcService, subnetService, routeService, gatewayService, securityGroupService, notificationService);
+        GatewayService gatewayService = new GatewayService(ec2);
+
+        IpAddressService ipAddressService = new IpAddressService();
+        SecurityGroupService securityGroupService = new SecurityGroupService(ec2, ipAddressService);
+
+        return new NetworkService(nameService, vpcService, subnetService, routeService, gatewayService, securityGroupService);
     }
 
     public DatabaseService databaseService() {
@@ -59,5 +61,14 @@ public class ServiceFactory {
         DatabaseInstanceService databaseInstanceService = new DatabaseInstanceService(rds, conditionalService);
 
         return new DatabaseService(nameService, databaseSubnetGroupService, databaseInstanceService);
+    }
+
+    public StorageService storageService() {
+        AmazonS3 s3 = awsClientFactory.s3();
+
+        NameService nameService = new NameService(environmentName);
+        BucketService bucketService = new BucketService(s3);
+
+        return new StorageService(nameService, bucketService);
     }
 }

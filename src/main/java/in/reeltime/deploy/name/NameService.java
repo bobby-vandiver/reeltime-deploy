@@ -3,6 +3,7 @@ package in.reeltime.deploy.name;
 import com.amazonaws.services.ec2.model.*;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
+import com.amazonaws.services.s3.model.Bucket;
 import com.google.common.collect.ImmutableMap;
 import in.reeltime.deploy.database.Database;
 
@@ -18,6 +19,7 @@ public class NameService {
             .put(Database.class, "%s")
             .put(DBInstance.class, "%s-db-instance")
             .put(DBSubnetGroup.class, "%s-db-subnet-group")
+            .put(Bucket.class, "%s-bucket")
             .build();
 
     private final String environmentName;
