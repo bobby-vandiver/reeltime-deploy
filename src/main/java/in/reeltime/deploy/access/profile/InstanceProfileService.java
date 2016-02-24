@@ -5,6 +5,7 @@ import com.amazonaws.services.identitymanagement.model.*;
 import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
+import java.util.Optional;
 
 public class InstanceProfileService {
 
@@ -23,9 +24,11 @@ public class InstanceProfileService {
         Logger.info("Getting instance profile: %s", instanceProfileName);
         List<InstanceProfile> instanceProfiles = iam.listInstanceProfiles().getInstanceProfiles();
 
-        return instanceProfiles.stream()
+        Optional<InstanceProfile> optionalProfile = instanceProfiles.stream()
                 .filter(ip -> ip.getInstanceProfileName().equals(instanceProfileName))
-                .findFirst().get();
+                .findFirst();
+
+        return optionalProfile.isPresent() ? optionalProfile.get() : null;
     }
 
     public InstanceProfile createInstanceProfile(String instanceProfileName) {

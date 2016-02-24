@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class RoleService {
 
@@ -36,9 +37,11 @@ public class RoleService {
         Logger.info("Getting role: %s", roleName);
         List<Role> roles = iam.listRoles().getRoles();
 
-        return roles.stream()
+        Optional<Role> optionalRole = roles.stream()
                 .filter(r -> r.getRoleName().equals(roleName))
-                .findFirst().get();
+                .findFirst();
+
+        return optionalRole.isPresent() ? optionalRole.get() : null;
     }
 
     public Role createRole(String roleName, String policyDocumentName) {

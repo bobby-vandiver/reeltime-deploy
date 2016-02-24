@@ -26,28 +26,58 @@ public class AccessService {
     }
 
     public Access setupAccess(RolePolicyParameters rolePolicyParameters) {
-        String ec2InstanceRoleName = nameService.getNameForResource(Role.class, "ec2-instance");
-        Role ec2InstanceRole = roleService.createRole(ec2InstanceRoleName, "ec2-assume-policy");
+        Role ec2InstanceRole = getOrCreateRole("ec2-instance", "ec2-assume-policy");
 
-        String applicationStoragePolicyName = nameService.getNameForResource(RolePolicy.class, "application-storage");
-        ec2InstanceRole = roleService.addPolicy(ec2InstanceRole, applicationStoragePolicyName, "application-storage-policy", rolePolicyParameters);
-
-        String applicationTranscoderJobsPolicyName = nameService.getNameForResource(RolePolicy.class, "application-transcoder-jobs");
-        ec2InstanceRole = roleService.addPolicy(ec2InstanceRole, applicationTranscoderJobsPolicyName, "application-transcoder-jobs-policy", rolePolicyParameters);
-
-        String transcoderNotificationSubscriptionPolicyName = nameService.getNameForResource(RolePolicy.class, "transcoder-notification-subscription");
-        ec2InstanceRole = roleService.addPolicy(ec2InstanceRole, transcoderNotificationSubscriptionPolicyName, "transcoder-notification-subscription-policy", rolePolicyParameters);
+        ec2InstanceRole = addPolicyToRole(ec2InstanceRole, "application-storage", "application-storage-policy", rolePolicyParameters);
+        ec2InstanceRole = addPolicyToRole(ec2InstanceRole, "application-transcoder-jobs", "application-transcoder-jobs-policy", rolePolicyParameters);
+        ec2InstanceRole = addPolicyToRole(ec2InstanceRole, "transcoder-notification-subscription", "transcoder-notification-subscription-policy", rolePolicyParameters);
 
         // The instance profile name *must* match the role name
-        InstanceProfile ec2InstanceProfile = instanceProfileService.createInstanceProfile(ec2InstanceRoleName);
-        ec2InstanceProfile = instanceProfileService.addRole(ec2InstanceProfile, ec2InstanceRole);
+        InstanceProfile ec2InstanceProfile = getOrCreateInstanceProfile(ec2InstanceRole.getRoleName());
+        ec2InstanceProfile = addRoleToInstanceProfile(ec2InstanceProfile, ec2InstanceRole);
 
-        String transcoderRoleName = nameService.getNameForResource(Role.class, "transcoder");
-        Role transcoderRole = roleService.createRole(transcoderRoleName, "elastictranscoder-assume-policy");
-
-        String transcodeVideosPolicyName = nameService.getNameForResource(RolePolicy.class, "transcode-videos-policy");
-        transcoderRole = roleService.addPolicy(transcoderRole, transcodeVideosPolicyName, "transcode-videos-policy", rolePolicyParameters);
+        Role transcoderRole = getOrCreateRole("transcoder", "elastictranscoder-assume-policy");
+        transcoderRole = addPolicyToRole(transcoderRole, "transcode-videos", "transcode-videos-policy", rolePolicyParameters);
 
         return new Access(ec2InstanceRole, transcoderRole, ec2InstanceProfile);
+    }
+
+    private Role getOrCreateRole(String roleNameSuffix, String policyName) {
+        String roleName = nameService.getNameForResource(Role.class, roleNameSuffix);
+        Role role;
+
+        if (roleService.roleExists(roleName)) {
+            role = roleService.getRole(roleName);
+        }
+        else {
+            role = roleService.createRole(roleName, policyName);
+        }
+        return role;
+    }
+
+    private Role addPolicyToRole(Role role, String policyNameSuffix, String policyDocumentName, RolePolicyParameters rolePolicyParameters) {
+        String policyName = nameService.getNameForResource(RolePolicy.class, policyNameSuffix);
+
+        if (!roleService.roleHasPolicy(role, policyName)) {
+            roleService.addPolicy(role, policyName, policyDocumentName, rolePolicyParameters);
+        }
+        return role;
+    }
+
+    private InstanceProfile getOrCreateInstanceProfile(String instanceProfileName) {
+        InstanceProfile instanceProfile;
+
+        if (instanceProfileService.instanceProfileExists(instanceProfileName)) {
+            instanceProfile = instanceProfileService.getInstanceProfile(instanceProfileName);
+        }
+        else {
+            instanceProfile = instanceProfileService.createInstanceProfile(instanceProfileName);
+        }
+        return instanceProfile;
+    }
+
+    private InstanceProfile addRoleToInstanceProfile(InstanceProfile instanceProfile, Role role) {
+        boolean hasRole = instanceProfile.getRoles().contains(role);
+        return hasRole ? instanceProfile : instanceProfileService.addRole(instanceProfile, role);
     }
 }
