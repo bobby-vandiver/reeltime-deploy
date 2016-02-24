@@ -106,7 +106,9 @@ public class SecurityGroupService {
 
             if (addressesRemaining >= MAX_IP_PERMISSIONS_PER_SECURITY_GROUP) {
                 ipAddresses = amazonIpAddresses.subList(idx, idx + MAX_IP_PERMISSIONS_PER_SECURITY_GROUP);
+
                 addressesRemaining -= MAX_IP_PERMISSIONS_PER_SECURITY_GROUP;
+                idx += MAX_IP_PERMISSIONS_PER_SECURITY_GROUP;
             }
             else {
                 ipAddresses = amazonIpAddresses.subList(idx, idx + addressesRemaining);

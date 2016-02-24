@@ -4,6 +4,9 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.log.Logger;
 
+import java.util.List;
+import java.util.Optional;
+
 public class RouteService {
 
     private final AmazonEC2 ec2;
@@ -12,7 +15,53 @@ public class RouteService {
         this.ec2 = ec2;
     }
 
+    public boolean routeTableExists(Vpc vpc, Subnet subnet) {
+        return !getRouteTables(vpc, subnet).isEmpty();
+    }
+
+    public RouteTable getRouteTable(Vpc vpc, Subnet subnet) {
+        List<RouteTable> routeTables = getRouteTables(vpc, subnet);
+
+        String vpcId = vpc.getVpcId();
+        String subnetId = subnet.getSubnetId();
+
+        if (routeTables.isEmpty()) {
+            String message = String.format("Route table does not exist for subnet [%s] in vpc [%s]", subnetId, vpcId);
+            throw new IllegalArgumentException(message);
+        }
+        else if (routeTables.size() > 1) {
+            String message = String.format("Multiple route tables exist for subnet [%s] in vpc [%s]", subnetId, vpcId);
+            throw new IllegalArgumentException(message);
+        }
+
+        return routeTables.get(0);
+    }
+
+    private List<RouteTable> getRouteTables(Vpc vpc, Subnet subnet) {
+        String vpcId = vpc.getVpcId();
+        String subnetId = subnet.getSubnetId();
+
+        Filter vpcFilter = new Filter()
+                .withName("vpc-id")
+                .withValues(vpcId);
+
+        Filter subnetFilter = new Filter()
+                .withName("association.subnet-id")
+                .withValues(subnetId);
+
+        DescribeRouteTablesRequest request = new DescribeRouteTablesRequest()
+                .withFilters(vpcFilter, subnetFilter);
+
+        DescribeRouteTablesResult result = ec2.describeRouteTables(request);
+        return result.getRouteTables();
+    }
+
     public RouteTable createRouteTable(Vpc vpc, Subnet subnet) {
+        if (routeTableExists(vpc, subnet)) {
+            Logger.info("Route table exists for subnet [%s] in vpc [%s]", subnet.getSubnetId(), vpc.getVpcId());
+            return getRouteTable(vpc, subnet);
+        }
+
         RouteTable routeTable = createRouteTable(vpc);
         associateRouteTableWithSubnet(routeTable, subnet);
         return routeTable;
@@ -41,8 +90,23 @@ public class RouteService {
         ec2.associateRouteTable(request);
     }
 
+    public boolean routeTableHasRoute(RouteTable routeTable, String cidrBlock, String gatewayId) {
+        List<Route> routes = routeTable.getRoutes();
+
+        return routes.stream()
+                .filter(r -> r.getDestinationCidrBlock().equals(cidrBlock))
+                .filter(r -> r.getGatewayId().equals(gatewayId))
+                .findFirst()
+                .isPresent();
+    }
+
     public void addRouteToRouteTable(RouteTable routeTable, String cidrBlock, String gatewayId) {
         String routeTableId = routeTable.getRouteTableId();
+
+        if (routeTableHasRoute(routeTable, cidrBlock, gatewayId)) {
+            Logger.info("Route table [%s] has route to cidr block [%s] for gateway [%s]", routeTableId, cidrBlock, gatewayId);
+            return;
+        }
 
         CreateRouteRequest request = new CreateRouteRequest()
                 .withGatewayId(gatewayId)

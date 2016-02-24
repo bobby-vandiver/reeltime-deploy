@@ -20,7 +20,55 @@ public class SubnetService {
         return result.getAvailabilityZones();
     }
 
+    public boolean subnetExists(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
+        return !getSubnets(vpc, availabilityZone, cidrBlock).isEmpty();
+    }
+
+    public Subnet getSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
+        List<Subnet> subnets = getSubnets(vpc, availabilityZone, cidrBlock);
+        String vpcId = vpc.getVpcId();
+
+        if (subnets.isEmpty()) {
+            String message = String.format("Unknown subnet for cidr block [%s] in vpc [%s]", cidrBlock, vpcId);
+            throw new IllegalArgumentException(message);
+        }
+        else if (subnets.size() > 1) {
+            String message = String.format("Found multiple subnets for cidr block [%s] in vpc [%s]", cidrBlock, vpcId);
+            throw new IllegalArgumentException(message);
+        }
+
+        return subnets.get(0);
+    }
+
+    private List<Subnet> getSubnets(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
+        String vpcId = vpc.getVpcId();
+        String zoneName = availabilityZone.getZoneName();
+
+        Filter vpcFilter = new Filter()
+                .withName("vpc-id")
+                .withValues(vpcId);
+
+        Filter availabilityZoneFilter = new Filter()
+                .withName("availabilityZone")
+                .withValues(zoneName);
+
+        Filter cidrBlockFilter = new Filter()
+                .withName("cidrBlock")
+                .withValues(cidrBlock);
+
+        DescribeSubnetsRequest request = new DescribeSubnetsRequest()
+                .withFilters(vpcFilter, availabilityZoneFilter, cidrBlockFilter);
+
+        DescribeSubnetsResult result = ec2.describeSubnets(request);
+        return result.getSubnets();
+    }
+
     public Subnet createSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
+        if (subnetExists(vpc, availabilityZone, cidrBlock)) {
+            Logger.info("Subnet for cidr block [%s] already exists", cidrBlock);
+            return getSubnet(vpc, availabilityZone, cidrBlock);
+        }
+
         String vpcId = vpc.getVpcId();
         String zoneName = availabilityZone.getZoneName();
 

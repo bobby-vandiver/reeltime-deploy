@@ -1,6 +1,7 @@
 package in.reeltime.deploy.network;
 
 import com.amazonaws.services.ec2.model.*;
+import in.reeltime.deploy.log.Logger;
 import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.network.gateway.GatewayService;
 import in.reeltime.deploy.network.route.RouteService;
@@ -45,8 +46,7 @@ public class NetworkService {
         AvailabilityZone zone1 = availabilityZones.get(0);
         AvailabilityZone zone2 = availabilityZones.get(1);
 
-        Vpc vpc = vpcService.createVpc("10.0.0.0/16");
-        nameService.setNameTag(Vpc.class, vpc.getVpcId());
+        Vpc vpc = createVpc("10.0.0.0/16");
 
         Subnet publicSubnet = subnetService.createSubnet(vpc, zone1, "10.0.0.0/24");
         nameService.setNameTag(Subnet.class, publicSubnet.getSubnetId(), "public");
@@ -89,5 +89,21 @@ public class NetworkService {
                 .withDatabaseSecurityGroup(databaseSecurityGroup)
                 .withAmazonServicesSecurityGroups(amazonServicesSecurityGroups)
                 .build();
+    }
+
+    private Vpc createVpc(String cidrBlock) {
+        Vpc vpc;
+
+        if (nameService.nameTagExists(Vpc.class)) {
+            Logger.info("Vpc already exists");
+            String vpcName = nameService.getNameForResource(Vpc.class);
+            vpc = vpcService.getVpc(vpcName);
+        }
+        else {
+            vpc = vpcService.createVpc(cidrBlock);
+            nameService.setNameTag(Vpc.class, vpc.getVpcId());
+        }
+
+        return vpc;
     }
 }
