@@ -1,24 +1,33 @@
 package in.reeltime.deploy.transcoder;
 
+import com.amazonaws.services.elastictranscoder.model.Pipeline;
 import com.amazonaws.services.sns.model.Topic;
 
 public class Transcoder {
 
-    private final Topic transcoderTopic;
+    private final Topic topic;
+    private final Pipeline pipeline;
 
     private Transcoder(Builder builder) {
-        this.transcoderTopic = builder.transcoderTopic;
+        this.topic = builder.topic;
+        this.pipeline = builder.pipeline;
     }
 
-    public Topic getTranscoderTopic() {
-        return transcoderTopic;
+    public Topic getTopic() {
+        return topic;
     }
 
     public static class Builder {
-        private Topic transcoderTopic;
+        private Topic topic;
+        private Pipeline pipeline;
 
-        public Builder withTranscoderTopic(Topic topic) {
-            transcoderTopic = topic;
+        public Builder withTopic(Topic topic) {
+            this.topic = topic;
+            return this;
+        }
+
+        public Builder withPipeline(Pipeline pipeline) {
+            this.pipeline = pipeline;
             return this;
         }
 

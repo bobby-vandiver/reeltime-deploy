@@ -1,6 +1,7 @@
 package in.reeltime.deploy.name;
 
 import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.elastictranscoder.model.Pipeline;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
@@ -25,6 +26,7 @@ public class NameService {
             .put(DBSubnetGroup.class, "%s-db-subnet-group")
             .put(Bucket.class, "%s-bucket")
             .put(Transcoder.class, "%s-transcoder")
+            .put(Pipeline.class, "%s-transcoder-pipeline")
             .put(Topic.class, "%s-topic")
             .put(Role.class, "%s-role")
             .put(RolePolicy.class, "%s-role-policy")

@@ -4,6 +4,8 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
+import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoderClient;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
 import com.amazonaws.services.rds.AmazonRDS;
@@ -28,6 +30,10 @@ public class AwsClientFactory {
 
     public AmazonEC2 ec2() {
         return new AmazonEC2Client(credentials);
+    }
+
+    public AmazonElasticTranscoder ets() {
+        return new AmazonElasticTranscoderClient(credentials);
     }
 
     public AmazonIdentityManagement iam() {

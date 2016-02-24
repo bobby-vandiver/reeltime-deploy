@@ -1,6 +1,7 @@
 package in.reeltime.deploy.factory;
 
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.s3.AmazonS3;
@@ -27,6 +28,7 @@ import in.reeltime.deploy.resource.ResourceService;
 import in.reeltime.deploy.storage.StorageService;
 import in.reeltime.deploy.storage.bucket.BucketService;
 import in.reeltime.deploy.transcoder.TranscoderService;
+import in.reeltime.deploy.transcoder.pipeline.PipelineService;
 
 public class ServiceFactory {
 
@@ -82,11 +84,14 @@ public class ServiceFactory {
 
     public TranscoderService transcoderService() {
         AmazonSNS sns = awsClientFactory.sns();
+        AmazonElasticTranscoder ets = awsClientFactory.ets();
 
         NameService nameService = new NameService(environmentName);
-        TopicService topicService = new TopicService(sns);
 
-        return new TranscoderService(nameService, topicService);
+        TopicService topicService = new TopicService(sns);
+        PipelineService pipelineService = new PipelineService(ets);
+
+        return new TranscoderService(nameService, topicService, pipelineService);
     }
 
     public AccessService accessService() {

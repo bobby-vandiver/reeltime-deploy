@@ -11,6 +11,7 @@ import in.reeltime.deploy.network.Network;
 import in.reeltime.deploy.network.NetworkService;
 import in.reeltime.deploy.storage.Storage;
 import in.reeltime.deploy.storage.StorageService;
+import in.reeltime.deploy.transcoder.Transcoder;
 import in.reeltime.deploy.transcoder.TranscoderService;
 import org.apache.commons.cli.*;
 
@@ -41,27 +42,29 @@ public class Application {
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
-            NetworkService networkService = serviceFactory.networkService();
-            Network network = networkService.setupNetwork();
-
+//            NetworkService networkService = serviceFactory.networkService();
+//            Network network = networkService.setupNetwork();
+//
 //            DatabaseService databaseService = serviceFactory.databaseService();
 //            Database database = databaseService.setupDatabase(network);
 
-//            StorageService storageService = serviceFactory.storageService();
-//            Storage storage = storageService.setupStorage();
-//
-//            TranscoderService transcoderService = serviceFactory.transcoderService();
-//            String transcoderTopicName = transcoderService.getTranscoderTopicName();
-//
-//            RolePolicyParameters rolePolicyParameters = new RolePolicyParameters(
-//                    accountId,
-//                    storage.getMasterVideosBucket(),
-//                    storage.getThumbnailsBucket(),
-//                    storage.getPlaylistsAndSegmentsBucket(),
-//                    transcoderTopicName);
-//
-//            AccessService accessService = serviceFactory.accessService();
-//            Access access = accessService.setupAccess(rolePolicyParameters);
+            StorageService storageService = serviceFactory.storageService();
+            Storage storage = storageService.setupStorage();
+
+            TranscoderService transcoderService = serviceFactory.transcoderService();
+            String transcoderTopicName = transcoderService.getTranscoderTopicName();
+
+            RolePolicyParameters rolePolicyParameters = new RolePolicyParameters(
+                    accountId,
+                    storage.getMasterVideosBucket(),
+                    storage.getThumbnailsBucket(),
+                    storage.getPlaylistsAndSegmentsBucket(),
+                    transcoderTopicName);
+
+            AccessService accessService = serviceFactory.accessService();
+            Access access = accessService.setupAccess(rolePolicyParameters);
+
+            Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
 
             System.out.println("Success!");
         }
