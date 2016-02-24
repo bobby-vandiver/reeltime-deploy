@@ -36,9 +36,6 @@ public class NetworkService {
     }
 
     public Network setupNetwork() {
-        Vpc vpc = vpcService.createVpc("10.0.0.0/16");
-        nameService.setNameTag(Vpc.class, vpc.getVpcId());
-
         List<AvailabilityZone> availabilityZones = subnetService.getAvailabilityZones();
 
         if (availabilityZones.size() < 2) {
@@ -47,6 +44,9 @@ public class NetworkService {
 
         AvailabilityZone zone1 = availabilityZones.get(0);
         AvailabilityZone zone2 = availabilityZones.get(1);
+
+        Vpc vpc = vpcService.createVpc("10.0.0.0/16");
+        nameService.setNameTag(Vpc.class, vpc.getVpcId());
 
         Subnet publicSubnet = subnetService.createSubnet(vpc, zone1, "10.0.0.0/24");
         nameService.setNameTag(Subnet.class, publicSubnet.getSubnetId(), "public");
