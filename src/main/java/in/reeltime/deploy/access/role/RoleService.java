@@ -29,12 +29,12 @@ public class RoleService {
     }
 
     public boolean roleExists(String roleName) {
-        Logger.info("Checking existence of role: %s", roleName);
+        Logger.info("Checking existence of role [%s]", roleName);
         return getRole(roleName) != null;
     }
 
     public Role getRole(String roleName) {
-        Logger.info("Getting role: %s", roleName);
+        Logger.info("Getting role [%s]", roleName);
         List<Role> roles = iam.listRoles().getRoles();
 
         Optional<Role> optionalRole = roles.stream()
@@ -45,13 +45,18 @@ public class RoleService {
     }
 
     public Role createRole(String roleName, String policyDocumentName) {
+        if (roleExists(roleName)) {
+            Logger.info("Role [%s] already exists", roleName);
+            return getRole(roleName);
+        }
+
         String policyDocument = getPolicyDocument(ROLE_FORMAT, policyDocumentName);
 
         CreateRoleRequest request = new CreateRoleRequest()
                 .withAssumeRolePolicyDocument(policyDocument)
                 .withRoleName(roleName);
 
-        Logger.info("Creating role: %s", roleName);
+        Logger.info("Creating role [%s]", roleName);
 
         CreateRoleResult result = iam.createRole(request);
         return result.getRole();
@@ -65,7 +70,7 @@ public class RoleService {
 
         ListRolePoliciesResult result = iam.listRolePolicies(request);
 
-        Logger.info("Checking role %s for policy %s", roleName, policyName);
+        Logger.info("Checking role [%s] for policy [%s]", roleName, policyName);
 
         List<String> policyNames = result.getPolicyNames();
         return policyNames.contains(policyName);
@@ -73,6 +78,12 @@ public class RoleService {
 
     public Role addPolicy(Role role, String policyName, String policyDocumentName, RolePolicyParameters parameters) {
         String roleName = role.getRoleName();
+
+        if (roleHasPolicy(role, policyName)) {
+            Logger.info("Role [%s] already contains policy [%s]", roleName, policyName);
+            return role;
+        }
+
         String policyDocument = getPolicyDocument(ROLE_POLICY_FORMAT, policyDocumentName, parameters.toMap());
 
         PutRolePolicyRequest request = new PutRolePolicyRequest()
@@ -80,7 +91,7 @@ public class RoleService {
                 .withPolicyName(policyName)
                 .withPolicyDocument(policyDocument);
 
-        Logger.info("Adding policy %s to role %s", policyName, roleName);
+        Logger.info("Adding policy [%s] to role [%s]", policyName, roleName);
 
         iam.putRolePolicy(request);
         return refreshRole(role);

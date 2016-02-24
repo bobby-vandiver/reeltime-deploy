@@ -15,9 +15,9 @@ public class StorageService {
     }
 
     public Storage setupStorage() {
-        Bucket masterVideosBucket = getOrCreateBucket("master-videos");
-        Bucket thumbnailsBucket = getOrCreateBucket("thumbnails");
-        Bucket playlistsAndSegmentsBucket = getOrCreateBucket("playlists-and-segments");
+        Bucket masterVideosBucket = createBucket("master-videos");
+        Bucket thumbnailsBucket = createBucket("thumbnails");
+        Bucket playlistsAndSegmentsBucket = createBucket("playlists-and-segments");
 
         return new Storage.Builder()
                 .withMasterVideosBucket(masterVideosBucket)
@@ -26,16 +26,8 @@ public class StorageService {
                 .build();
     }
 
-    private Bucket getOrCreateBucket(String nameSuffix) {
+    private Bucket createBucket(String nameSuffix) {
         String name = nameService.getNameForResource(Bucket.class, nameSuffix);
-        Bucket bucket;
-
-        if (bucketService.bucketExists(name)) {
-            bucket = bucketService.getBucket(name);
-        }
-        else {
-            bucket = bucketService.createBucket(name);
-        }
-        return bucket;
+        return bucketService.createBucket(name);
     }
 }

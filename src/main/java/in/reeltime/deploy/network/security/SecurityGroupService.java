@@ -22,6 +22,24 @@ public class SecurityGroupService {
         this.ipAddressService = ipAddressService;
     }
 
+    public boolean securityGroupExists(Vpc vpc, String groupName) {
+        Filter vpcIdFilter = new Filter()
+                .withName("vpc-id")
+                .withValues(vpc.getVpcId());
+
+        Filter groupNameFilter = new Filter()
+                .withName("group-name")
+                .withValues(groupName);
+
+        DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
+                .withFilters(vpcIdFilter, groupNameFilter);
+
+        DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(request);
+        List<SecurityGroup> securityGroups = result.getSecurityGroups();
+
+        return !securityGroups.isEmpty();
+    }
+
     public SecurityGroup getSecurityGroup(Vpc vpc, String groupName) {
         Filter vpcIdFilter = new Filter()
                 .withName("vpc-id")
@@ -48,6 +66,11 @@ public class SecurityGroupService {
     }
 
     public SecurityGroup createSecurityGroup(Vpc vpc, String groupName) {
+        if (securityGroupExists(vpc, groupName)) {
+            Logger.info("Security group %s already exists", groupName);
+            return getSecurityGroup(vpc, groupName);
+        }
+
         String vpcId = vpc.getVpcId();
         String description = String.format(DESCRIPTION_FORMAT, groupName);
 
@@ -100,6 +123,14 @@ public class SecurityGroupService {
         return securityGroups;
     }
 
+    public boolean securityGroupHasIngressRule(SecurityGroup securityGroup, IpPermission permission) {
+        return securityGroup.getIpPermissions().contains(permission);
+    }
+
+    public boolean securityGroupHasEgressRules(SecurityGroup securityGroup, Collection<IpPermission> permissions) {
+        return securityGroup.getIpPermissionsEgress().containsAll(permissions);
+    }
+
     public SecurityGroup addIngressRule(SecurityGroup securityGroup, Collection<String> inboundIpRanges, String protocol, Integer port) {
         String groupId = securityGroup.getGroupId();
 
@@ -108,6 +139,11 @@ public class SecurityGroupService {
                 .withIpProtocol(protocol)
                 .withToPort(port)
                 .withFromPort(port);
+
+        if (securityGroupHasIngressRule(securityGroup, permission)) {
+            Logger.info("Security group [%s] already contains permission [%s]", securityGroup.getGroupName(), permission);
+            return securityGroup;
+        }
 
         AuthorizeSecurityGroupIngressRequest request = new AuthorizeSecurityGroupIngressRequest()
                 .withGroupId(groupId)
@@ -138,6 +174,12 @@ public class SecurityGroupService {
                 .withToPort(port)
                 .withFromPort(port);
 
+
+        if (securityGroupHasIngressRule(toGroup, permission)) {
+            Logger.info("Security group [%s] already contains permission [%s]", toGroup.getGroupName(), permission);
+            return toGroup;
+        }
+
         String toGroupId = toGroup.getGroupId();
 
         AuthorizeSecurityGroupIngressRequest request = new AuthorizeSecurityGroupIngressRequest()
@@ -153,6 +195,11 @@ public class SecurityGroupService {
     public SecurityGroup revokeAllEgressRules(SecurityGroup securityGroup) {
         String groupId = securityGroup.getGroupId();
         List<IpPermission> egressRules = securityGroup.getIpPermissionsEgress();
+
+        if (securityGroupHasEgressRules(securityGroup, egressRules)) {
+            Logger.info("Security group [%s] already has all egress rules [%s]", securityGroup.getGroupName(), egressRules);
+            return securityGroup;
+        }
 
         RevokeSecurityGroupEgressRequest request = new RevokeSecurityGroupEgressRequest()
                 .withGroupId(groupId)

@@ -41,27 +41,27 @@ public class Application {
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
-//            NetworkService networkService = serviceFactory.networkService();
-//            Network network = networkService.setupNetwork();
+            NetworkService networkService = serviceFactory.networkService();
+            Network network = networkService.setupNetwork();
 
 //            DatabaseService databaseService = serviceFactory.databaseService();
 //            Database database = databaseService.setupDatabase(network);
 
-            StorageService storageService = serviceFactory.storageService();
-            Storage storage = storageService.setupStorage();
-
-            TranscoderService transcoderService = serviceFactory.transcoderService();
-            String transcoderTopicName = transcoderService.getTranscoderTopicName();
-
-            RolePolicyParameters rolePolicyParameters = new RolePolicyParameters(
-                    accountId,
-                    storage.getMasterVideosBucket(),
-                    storage.getThumbnailsBucket(),
-                    storage.getPlaylistsAndSegmentsBucket(),
-                    transcoderTopicName);
-
-            AccessService accessService = serviceFactory.accessService();
-            Access access = accessService.setupAccess(rolePolicyParameters);
+//            StorageService storageService = serviceFactory.storageService();
+//            Storage storage = storageService.setupStorage();
+//
+//            TranscoderService transcoderService = serviceFactory.transcoderService();
+//            String transcoderTopicName = transcoderService.getTranscoderTopicName();
+//
+//            RolePolicyParameters rolePolicyParameters = new RolePolicyParameters(
+//                    accountId,
+//                    storage.getMasterVideosBucket(),
+//                    storage.getThumbnailsBucket(),
+//                    storage.getPlaylistsAndSegmentsBucket(),
+//                    transcoderTopicName);
+//
+//            AccessService accessService = serviceFactory.accessService();
+//            Access access = accessService.setupAccess(rolePolicyParameters);
 
             System.out.println("Success!");
         }

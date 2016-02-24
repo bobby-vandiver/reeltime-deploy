@@ -16,12 +16,12 @@ public class InstanceProfileService {
     }
 
     public boolean instanceProfileExists(String instanceProfileName) {
-        Logger.info("Checking existence of instance profile: %s", instanceProfileName);
+        Logger.info("Checking existence of instance profile [%s]", instanceProfileName);
         return getInstanceProfile(instanceProfileName) != null;
     }
 
     public InstanceProfile getInstanceProfile(String instanceProfileName) {
-        Logger.info("Getting instance profile: %s", instanceProfileName);
+        Logger.info("Getting instance profile [%s]", instanceProfileName);
         List<InstanceProfile> instanceProfiles = iam.listInstanceProfiles().getInstanceProfiles();
 
         Optional<InstanceProfile> optionalProfile = instanceProfiles.stream()
@@ -32,10 +32,15 @@ public class InstanceProfileService {
     }
 
     public InstanceProfile createInstanceProfile(String instanceProfileName) {
+        if (instanceProfileExists(instanceProfileName)) {
+            Logger.info("Instance profile [%s] already exists", instanceProfileName);
+            return getInstanceProfile(instanceProfileName);
+        }
+
         CreateInstanceProfileRequest request = new CreateInstanceProfileRequest()
                 .withInstanceProfileName(instanceProfileName);
 
-        Logger.info("Creating instance profile: %s", instanceProfileName);
+        Logger.info("Creating instance profile [%s]", instanceProfileName);
 
         CreateInstanceProfileResult result = iam.createInstanceProfile(request);
         return result.getInstanceProfile();
@@ -45,11 +50,18 @@ public class InstanceProfileService {
         String instanceProfileName = instanceProfile.getInstanceProfileName();
         String roleName = role.getRoleName();
 
+        boolean hasRole = instanceProfile.getRoles().contains(role);
+
+        if (hasRole) {
+            Logger.info("Instance profile [%s] already has role [%s]", instanceProfileName, roleName);
+            return instanceProfile;
+        }
+
         AddRoleToInstanceProfileRequest request = new AddRoleToInstanceProfileRequest()
                 .withInstanceProfileName(instanceProfileName)
                 .withRoleName(roleName);
 
-        Logger.info("Adding role %s to instance profile %s", roleName, instanceProfileName);
+        Logger.info("Adding role [%s] to instance profile [%s]", roleName, instanceProfileName);
 
         iam.addRoleToInstanceProfile(request);
         return refreshInstanceProfile(instanceProfile);

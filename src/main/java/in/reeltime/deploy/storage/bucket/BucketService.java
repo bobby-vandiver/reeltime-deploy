@@ -13,12 +13,12 @@ public class BucketService {
     }
 
     public boolean bucketExists(String bucketName) {
-        Logger.info("Checking existence of bucket: %s", bucketName);
+        Logger.info("Checking existence of bucket [%s]", bucketName);
         return s3.doesBucketExist(bucketName);
     }
 
     public Bucket getBucket(String bucketName) {
-        Logger.info("Getting bucket: %s", bucketName);
+        Logger.info("Getting bucket [%s]", bucketName);
 
         return s3.listBuckets().stream()
                 .filter(b -> b.getName().equals(bucketName))
@@ -26,12 +26,17 @@ public class BucketService {
     }
 
     public Bucket createBucket(String bucketName) {
-        Logger.info("Creating bucket: %s", bucketName);
+        if (bucketExists(bucketName)) {
+            Logger.info("Bucket [%s] already exists", bucketName);
+            return getBucket(bucketName);
+        }
+
+        Logger.info("Creating bucket [%s]", bucketName);
         return s3.createBucket(bucketName);
     }
 
     public void removeBucket(String bucketName) {
-        Logger.info("Removing bucket: %s", bucketName);
+        Logger.info("Removing bucket [%s]", bucketName);
         s3.deleteBucket(bucketName);
     }
 }
