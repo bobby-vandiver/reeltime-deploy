@@ -10,10 +10,13 @@ public class Storage {
 
     private final Bucket playlistsAndSegmentsBucket;
 
+    private final Bucket warsBucket;
+
     private Storage(Builder builder) {
         this.masterVideosBucket = builder.masterVideosBucket;
         this.thumbnailsBucket = builder.thumbnailsBucket;
         this.playlistsAndSegmentsBucket = builder.playlistsAndSegmentsBucket;
+        this.warsBucket = builder.warsBucket;
     }
 
     public Bucket getMasterVideosBucket() {
@@ -28,10 +31,15 @@ public class Storage {
         return playlistsAndSegmentsBucket;
     }
 
+    public Bucket getWarsBucket() {
+        return warsBucket;
+    }
+
     public static class Builder {
         private Bucket masterVideosBucket;
         private Bucket thumbnailsBucket;
         private Bucket playlistsAndSegmentsBucket;
+        private Bucket warsBucket;
 
         public Builder withMasterVideosBucket(Bucket bucket) {
             masterVideosBucket = bucket;
@@ -45,6 +53,11 @@ public class Storage {
 
         public Builder withPlaylistsAndSegmentsBucket(Bucket bucket) {
             playlistsAndSegmentsBucket = bucket;
+            return this;
+        }
+
+        public Builder withWarsBucket(Bucket bucket) {
+            warsBucket = bucket;
             return this;
         }
 

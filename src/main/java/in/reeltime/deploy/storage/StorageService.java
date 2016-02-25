@@ -18,11 +18,13 @@ public class StorageService {
         Bucket masterVideosBucket = createBucket("master-videos");
         Bucket thumbnailsBucket = createBucket("thumbnails");
         Bucket playlistsAndSegmentsBucket = createBucket("playlists-and-segments");
+        Bucket warsBucket = createBucket("wars");
 
         return new Storage.Builder()
                 .withMasterVideosBucket(masterVideosBucket)
                 .withThumbnailsBucket(thumbnailsBucket)
                 .withPlaylistsAndSegmentsBucket(playlistsAndSegmentsBucket)
+                .withWarsBucket(warsBucket)
                 .build();
     }
 
