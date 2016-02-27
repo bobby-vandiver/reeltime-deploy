@@ -17,7 +17,7 @@ import in.reeltime.deploy.database.subnet.DatabaseSubnetGroupService;
 import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.name.NameService;
 import in.reeltime.deploy.network.NetworkService;
-import in.reeltime.deploy.network.gateway.GatewayService;
+import in.reeltime.deploy.network.gateway.InternetGatewayService;
 import in.reeltime.deploy.network.route.RouteService;
 import in.reeltime.deploy.network.security.IpAddressService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
@@ -53,12 +53,12 @@ public class ServiceFactory {
         SubnetService subnetService = new SubnetService(ec2);
         RouteService routeService = new RouteService(ec2);
 
-        GatewayService gatewayService = new GatewayService(ec2);
+        InternetGatewayService internetGatewayService = new InternetGatewayService(ec2);
 
         IpAddressService ipAddressService = new IpAddressService();
         SecurityGroupService securityGroupService = new SecurityGroupService(ec2, ipAddressService);
 
-        return new NetworkService(nameService, vpcService, subnetService, routeService, gatewayService, securityGroupService);
+        return new NetworkService(nameService, vpcService, subnetService, routeService, internetGatewayService, securityGroupService);
     }
 
     public DatabaseService databaseService() {

@@ -6,11 +6,11 @@ import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 
-public class GatewayService {
+public class InternetGatewayService {
 
     private final AmazonEC2 ec2;
 
-    public GatewayService(AmazonEC2 ec2) {
+    public InternetGatewayService(AmazonEC2 ec2) {
         this.ec2 = ec2;
     }
 

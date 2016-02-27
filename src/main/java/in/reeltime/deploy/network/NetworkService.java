@@ -3,7 +3,7 @@ package in.reeltime.deploy.network;
 import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.log.Logger;
 import in.reeltime.deploy.name.AmazonEC2NameService;
-import in.reeltime.deploy.network.gateway.GatewayService;
+import in.reeltime.deploy.network.gateway.InternetGatewayService;
 import in.reeltime.deploy.network.route.RouteService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
@@ -22,17 +22,17 @@ public class NetworkService {
 
     private final RouteService routeService;
 
-    private final GatewayService gatewayService;
+    private final InternetGatewayService internetGatewayService;
 
     private final SecurityGroupService securityGroupService;
 
     public NetworkService(AmazonEC2NameService nameService, VpcService vpcService, SubnetService subnetService,
-                          RouteService routeService, GatewayService gatewayService, SecurityGroupService securityGroupService) {
+                          RouteService routeService, InternetGatewayService internetGatewayService, SecurityGroupService securityGroupService) {
         this.nameService = nameService;
         this.vpcService = vpcService;
         this.subnetService = subnetService;
         this.routeService = routeService;
-        this.gatewayService = gatewayService;
+        this.internetGatewayService = internetGatewayService;
         this.securityGroupService = securityGroupService;
     }
 
@@ -54,7 +54,7 @@ public class NetworkService {
         RouteTable publicRouteTable = routeService.createRouteTable(vpc, publicSubnet);
         nameService.setNameTag(RouteTable.class, publicRouteTable.getRouteTableId(), "public");
 
-        InternetGateway internetGateway = gatewayService.addInternetGateway(vpc);
+        InternetGateway internetGateway = internetGatewayService.addInternetGateway(vpc);
         routeService.addRouteToRouteTable(publicRouteTable, "0.0.0.0/0", internetGateway.getInternetGatewayId());
 
         Subnet privateSubnet1 = subnetService.createSubnet(vpc, zone1, "10.0.1.0/24");
