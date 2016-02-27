@@ -13,8 +13,8 @@ public class TransferAwareProgressListener implements ProgressListener {
     private long megaBytesTransferred = 0;
     private long bytesTransferred = 0;
 
-    public TransferAwareProgressListener(long totalSizeInMB) {
-        this.totalSizeInMB = totalSizeInMB;
+    public TransferAwareProgressListener(long totalSize) {
+        this.totalSizeInMB = totalSize / MEGABYTE;
     }
 
     @Override

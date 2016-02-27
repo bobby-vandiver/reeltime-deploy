@@ -1,6 +1,5 @@
 package in.reeltime.deploy.storage.object;
 
-import com.amazonaws.event.ProgressEvent;
 import com.amazonaws.event.ProgressListener;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.Bucket;
@@ -8,7 +7,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import in.reeltime.deploy.condition.ConditionalService;
 import in.reeltime.deploy.log.Logger;
-import in.reeltime.deploy.util.SizeConstants;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,7 +40,7 @@ public class ObjectService {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(totalSize);
 
-        ProgressListener progressListener = new TransferAwareProgressListener(totalSize / SizeConstants.MEGABYTE);
+        ProgressListener progressListener = new TransferAwareProgressListener(totalSize);
 
         PutObjectRequest request = new PutObjectRequest(bucketName, key, inputStream, metadata);
         request.setGeneralProgressListener(progressListener);

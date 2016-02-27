@@ -12,6 +12,8 @@ public class Network {
 
     private final Vpc vpc;
 
+    private final List<Subnet> loadBalancerSubnets;
+
     private final List<Subnet> applicationSubnets;
     private final List<Subnet> databaseSubnets;
 
@@ -22,6 +24,8 @@ public class Network {
 
     private Network(Builder builder) {
         this.vpc = builder.vpc;
+
+        this.loadBalancerSubnets = ImmutableList.copyOf(builder.loadBalancerSubnets);
 
         this.applicationSubnets = ImmutableList.copyOf(builder.applicationSubnets);
         this.databaseSubnets = ImmutableList.copyOf(builder.databaseSubnets);
@@ -34,6 +38,10 @@ public class Network {
 
     public Vpc getVpc() {
         return vpc;
+    }
+
+    public List<Subnet> getLoadBalancerSubnets() {
+        return loadBalancerSubnets;
     }
 
     public List<Subnet> getApplicationSubnets() {
@@ -59,6 +67,8 @@ public class Network {
     public static class Builder {
         private Vpc vpc;
 
+        private List<Subnet> loadBalancerSubnets;
+
         private List<Subnet> applicationSubnets;
         private List<Subnet> databaseSubnets;
 
@@ -68,12 +78,18 @@ public class Network {
         private List<SecurityGroup> amazonServicesSecurityGroups;
 
         public Builder() {
+            loadBalancerSubnets = Lists.newArrayList();
             applicationSubnets = Lists.newArrayList();
             databaseSubnets = Lists.newArrayList();
         }
 
         Builder withVpc(Vpc vpc) {
             this.vpc = vpc;
+            return this;
+        }
+
+        Builder withLoadBalancerSubnets(Subnet subnet) {
+            loadBalancerSubnets.add(subnet);
             return this;
         }
 
