@@ -12,26 +12,28 @@ public class Network {
 
     private final Vpc vpc;
 
-    private final List<Subnet> loadBalancerSubnets;
-
     private final List<Subnet> applicationSubnets;
-    private final List<Subnet> databaseSubnets;
-
     private final SecurityGroup applicationSecurityGroup;
+
+    private final List<Subnet> databaseSubnets;
     private final SecurityGroup databaseSecurityGroup;
+
+    private final List<Subnet> loadBalancerSubnets;
+    private final SecurityGroup loadBalancerSecurityGroup;
 
     private final List<SecurityGroup> amazonServicesSecurityGroups;
 
     private Network(Builder builder) {
         this.vpc = builder.vpc;
 
-        this.loadBalancerSubnets = ImmutableList.copyOf(builder.loadBalancerSubnets);
-
         this.applicationSubnets = ImmutableList.copyOf(builder.applicationSubnets);
-        this.databaseSubnets = ImmutableList.copyOf(builder.databaseSubnets);
-
         this.applicationSecurityGroup = builder.applicationSecurityGroup;
+
+        this.databaseSubnets = ImmutableList.copyOf(builder.databaseSubnets);
         this.databaseSecurityGroup = builder.databaseSecurityGroup;
+
+        this.loadBalancerSubnets = ImmutableList.copyOf(builder.loadBalancerSubnets);
+        this.loadBalancerSecurityGroup = builder.loadBalancerSecurityGroup;
 
         this.amazonServicesSecurityGroups = ImmutableList.copyOf(builder.amazonServicesSecurityGroups);
     }
@@ -40,24 +42,28 @@ public class Network {
         return vpc;
     }
 
-    public List<Subnet> getLoadBalancerSubnets() {
-        return loadBalancerSubnets;
-    }
-
     public List<Subnet> getApplicationSubnets() {
         return applicationSubnets;
-    }
-
-    public List<Subnet> getDatabaseSubnets() {
-        return databaseSubnets;
     }
 
     public SecurityGroup getApplicationSecurityGroup() {
         return applicationSecurityGroup;
     }
 
+    public List<Subnet> getDatabaseSubnets() {
+        return databaseSubnets;
+    }
+
     public SecurityGroup getDatabaseSecurityGroup() {
         return databaseSecurityGroup;
+    }
+
+    public List<Subnet> getLoadBalancerSubnets() {
+        return loadBalancerSubnets;
+    }
+
+    public SecurityGroup getLoadBalancerSecurityGroup() {
+        return loadBalancerSecurityGroup;
     }
 
     public List<SecurityGroup> getAmazonServicesSecurityGroups() {
@@ -67,29 +73,25 @@ public class Network {
     public static class Builder {
         private Vpc vpc;
 
-        private List<Subnet> loadBalancerSubnets;
-
         private List<Subnet> applicationSubnets;
-        private List<Subnet> databaseSubnets;
-
         private SecurityGroup applicationSecurityGroup;
+
+        private List<Subnet> databaseSubnets;
         private SecurityGroup databaseSecurityGroup;
+
+        private List<Subnet> loadBalancerSubnets;
+        private SecurityGroup loadBalancerSecurityGroup;
 
         private List<SecurityGroup> amazonServicesSecurityGroups;
 
         public Builder() {
-            loadBalancerSubnets = Lists.newArrayList();
             applicationSubnets = Lists.newArrayList();
             databaseSubnets = Lists.newArrayList();
+            loadBalancerSubnets = Lists.newArrayList();
         }
 
         Builder withVpc(Vpc vpc) {
             this.vpc = vpc;
-            return this;
-        }
-
-        Builder withLoadBalancerSubnets(Subnet subnet) {
-            loadBalancerSubnets.add(subnet);
             return this;
         }
 
@@ -98,18 +100,28 @@ public class Network {
             return this;
         }
 
-        Builder withDatabaseSubnet(Subnet subnet) {
-            databaseSubnets.add(subnet);
-            return this;
-        }
-
         Builder withApplicationSecurityGroup(SecurityGroup securityGroup) {
             applicationSecurityGroup = securityGroup;
             return this;
         }
 
+        Builder withDatabaseSubnet(Subnet subnet) {
+            databaseSubnets.add(subnet);
+            return this;
+        }
+
         Builder withDatabaseSecurityGroup(SecurityGroup securityGroup) {
             databaseSecurityGroup = securityGroup;
+            return this;
+        }
+
+        Builder withLoadBalancerSubnet(Subnet subnet) {
+            loadBalancerSubnets.add(subnet);
+            return this;
+        }
+
+        Builder withLoadBalancerSecurityGroup(SecurityGroup securityGroup) {
+            loadBalancerSecurityGroup = securityGroup;
             return this;
         }
 

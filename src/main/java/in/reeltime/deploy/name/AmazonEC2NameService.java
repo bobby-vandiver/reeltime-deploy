@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ public class AmazonEC2NameService extends NameService {
 
     private static Map<Class, String> RESOURCE_TYPE_FILTER_VALUES = new ImmutableMap.Builder<Class, String>()
             .put(Vpc.class, "vpc")
+            .put(Subnet.class, "subnet")
+            .put(RouteTable.class, "route-table")
             .build();
 
     private final AmazonEC2 ec2;
@@ -53,6 +56,13 @@ public class AmazonEC2NameService extends NameService {
 
     public void setNameTag(Class<?> resourceType, String resourceId, String suffix) {
         String name = getNameForResource(resourceType, suffix);
+
+        if (nameTagExists(resourceType, suffix)) {
+            Logger.info("Name tag [%s] already exists for resource [%s]", name, resourceId);
+            return;
+        }
+
+        Logger.info("Setting name tag [%s] for resource [%s]", name, resourceId);
         setNameTag(resourceId, name);
     }
 
