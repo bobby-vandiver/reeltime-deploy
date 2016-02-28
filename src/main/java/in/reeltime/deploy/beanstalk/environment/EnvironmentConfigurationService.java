@@ -30,6 +30,8 @@ public class EnvironmentConfigurationService {
         ConfigurationOptionSetting associatePublicIpAddress =
                 vpc("AssociatePublicIpAddress", "false");
 
+        // TODO: Use aws:elb:listener:[listener_port] options where applicable per Amazon's recommendation
+
         ConfigurationOptionSetting loadBalancerHttpPort =
                 loadBalancer("LoadBalancerHTTPPort", "OFF");
 
@@ -37,7 +39,7 @@ public class EnvironmentConfigurationService {
                 loadBalancer("LoadBalancerHTTPSPort", "443");
 
         ConfigurationOptionSetting loadBalancerSslCertificateId =
-                loadBalancer("SSLCertificateId", null);
+                loadBalancer("SSLCertificateId", access.getCertificate().getCertificateArn());
 
         ConfigurationOptionSetting iamInstanceProfile =
                 launchConfiguration("IamInstanceProfile", access.getEc2InstanceProfile().getInstanceProfileName());
