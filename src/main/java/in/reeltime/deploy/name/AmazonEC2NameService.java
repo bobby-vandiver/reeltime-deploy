@@ -8,6 +8,7 @@ import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class AmazonEC2NameService extends NameService {
 
@@ -47,7 +48,12 @@ public class AmazonEC2NameService extends NameService {
         DescribeTagsResult result = ec2.describeTags(request);
 
         List<TagDescription> tags = result.getTags();
-        return !tags.isEmpty() && tags.size() == 1 && tags.get(0).getValue().equals(name);
+
+        Optional<TagDescription> tag = tags.stream()
+                .filter(t -> t.getValue().equals(name))
+                .findFirst();
+
+        return tag.isPresent();
     }
 
     public void setNameTag(Class<?> resourceType, String resourceId) {
