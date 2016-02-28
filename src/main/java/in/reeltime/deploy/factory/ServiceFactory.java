@@ -1,5 +1,6 @@
 package in.reeltime.deploy.factory;
 
+import com.amazonaws.services.certificatemanager.AWSCertificateManager;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
@@ -7,6 +8,7 @@ import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.sns.AmazonSNS;
 import in.reeltime.deploy.access.AccessService;
+import in.reeltime.deploy.access.certificate.CertificateService;
 import in.reeltime.deploy.access.profile.InstanceProfileService;
 import in.reeltime.deploy.access.role.RoleService;
 import in.reeltime.deploy.aws.AwsClientFactory;
@@ -96,6 +98,7 @@ public class ServiceFactory {
 
     public AccessService accessService() {
         AmazonIdentityManagement iam = awsClientFactory.iam();
+        AWSCertificateManager acm = awsClientFactory.acm();
 
         NameService nameService = new NameService(environmentName);
         ResourceService resourceService = new ResourceService();
@@ -103,6 +106,8 @@ public class ServiceFactory {
         RoleService roleService = new RoleService(iam, resourceService);
         InstanceProfileService instanceProfileService = new InstanceProfileService(iam);
 
-        return new AccessService(nameService, roleService, instanceProfileService);
+        CertificateService certificateService = new CertificateService(acm);
+
+        return new AccessService(nameService, roleService, instanceProfileService, certificateService);
     }
 }

@@ -1,7 +1,9 @@
 package in.reeltime.deploy.access;
 
+import com.amazonaws.services.certificatemanager.model.CertificateDetail;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
+import in.reeltime.deploy.access.certificate.CertificateService;
 import in.reeltime.deploy.access.profile.InstanceProfileService;
 import in.reeltime.deploy.access.role.RolePolicy;
 import in.reeltime.deploy.access.role.RolePolicyParameters;
@@ -15,10 +17,13 @@ public class AccessService {
     private final RoleService roleService;
     private final InstanceProfileService instanceProfileService;
 
-    public AccessService(NameService nameService, RoleService roleService, InstanceProfileService instanceProfileService) {
+    private final CertificateService certificateService;
+
+    public AccessService(NameService nameService, RoleService roleService, InstanceProfileService instanceProfileService, CertificateService certificateService) {
         this.nameService = nameService;
         this.roleService = roleService;
         this.instanceProfileService = instanceProfileService;
+        this.certificateService = certificateService;
     }
 
     public Access setupAccess(RolePolicyParameters rolePolicyParameters) {
@@ -35,7 +40,9 @@ public class AccessService {
         Role transcoderRole = createRole("transcoder", "elastictranscoder-assume-policy");
         transcoderRole = addPolicyToRole(transcoderRole, "transcode-videos", "transcode-videos-policy", rolePolicyParameters);
 
-        return new Access(ec2InstanceRole, transcoderRole, ec2InstanceProfile);
+        CertificateDetail certificate = certificateService.getCertificate("*.bobbyvandiver.com");
+
+        return new Access(ec2InstanceRole, transcoderRole, ec2InstanceProfile, certificate);
     }
 
     private Role createRole(String roleNameSuffix, String policyName) {

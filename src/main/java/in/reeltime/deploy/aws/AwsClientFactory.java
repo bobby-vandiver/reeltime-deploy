@@ -2,6 +2,8 @@ package in.reeltime.deploy.aws;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.certificatemanager.AWSCertificateManager;
+import com.amazonaws.services.certificatemanager.AWSCertificateManagerClient;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
@@ -26,6 +28,10 @@ public class AwsClientFactory {
 
     public AwsClientFactory(AWSCredentials credentials) {
         this.credentials = credentials;
+    }
+
+    public AWSCertificateManager acm() {
+        return new AWSCertificateManagerClient(credentials);
     }
 
     public AmazonEC2 ec2() {

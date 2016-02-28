@@ -42,8 +42,8 @@ public class Application {
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
-//            NetworkService networkService = serviceFactory.networkService();
-//            Network network = networkService.setupNetwork();
+            NetworkService networkService = serviceFactory.networkService();
+            Network network = networkService.setupNetwork();
 //
 //            DatabaseService databaseService = serviceFactory.databaseService();
 //            Database database = databaseService.setupDatabase(network);
@@ -64,7 +64,7 @@ public class Application {
             AccessService accessService = serviceFactory.accessService();
             Access access = accessService.setupAccess(rolePolicyParameters);
 
-            Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
+//            Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
 
             System.out.println("Success!");
         }
