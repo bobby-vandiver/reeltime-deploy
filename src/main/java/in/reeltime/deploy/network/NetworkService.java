@@ -72,11 +72,13 @@ public class NetworkService {
 
         return new Network.Builder()
                 .withVpc(vpc)
-                .withApplicationSubnet(publicSubnet)
+                .withApplicationSubnet(privateSubnet1)
+                .withApplicationSubnet(privateSubnet2)
                 .withApplicationSecurityGroup(applicationSecurityGroup)
                 .withDatabaseSubnet(privateSubnet1)
                 .withDatabaseSubnet(privateSubnet2)
                 .withDatabaseSecurityGroup(databaseSecurityGroup)
+                .withLoadBalancerSubnet(publicSubnet)
                 .withLoadBalancerSecurityGroup(loadBalancerSecurityGroup)
                 .withAmazonServicesSecurityGroups(amazonServicesSecurityGroups)
                 .build();

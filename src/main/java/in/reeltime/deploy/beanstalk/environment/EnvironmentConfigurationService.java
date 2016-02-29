@@ -30,6 +30,12 @@ public class EnvironmentConfigurationService {
         ConfigurationOptionSetting associatePublicIpAddress =
                 vpc("AssociatePublicIpAddress", "false");
 
+        ConfigurationOptionSetting loadBalancerSecurityGroups =
+                loadBalancer("SecurityGroups", network.getLoadBalancerSecurityGroup().getGroupId());
+
+        ConfigurationOptionSetting loadBalancerManagedSecurityGroup =
+                loadBalancer("ManagedSecurityGroup", network.getLoadBalancerSecurityGroup().getGroupId());
+
         // TODO: Use aws:elb:listener:[listener_port] options where applicable per Amazon's recommendation
 
         ConfigurationOptionSetting loadBalancerHttpPort =
