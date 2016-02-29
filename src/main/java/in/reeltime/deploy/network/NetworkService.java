@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.log.Logger;
 import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.network.gateway.InternetGatewayService;
+import in.reeltime.deploy.network.gateway.NatGatewayService;
 import in.reeltime.deploy.network.route.RouteService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
 import in.reeltime.deploy.network.subnet.SubnetService;
@@ -24,15 +25,19 @@ public class NetworkService {
 
     private final InternetGatewayService internetGatewayService;
 
+    private final NatGatewayService natGatewayService;
+
     private final SecurityGroupService securityGroupService;
 
     public NetworkService(AmazonEC2NameService nameService, VpcService vpcService, SubnetService subnetService,
-                          RouteService routeService, InternetGatewayService internetGatewayService, SecurityGroupService securityGroupService) {
+                          RouteService routeService, InternetGatewayService internetGatewayService,
+                          NatGatewayService natGatewayService, SecurityGroupService securityGroupService) {
         this.nameService = nameService;
         this.vpcService = vpcService;
         this.subnetService = subnetService;
         this.routeService = routeService;
         this.internetGatewayService = internetGatewayService;
+        this.natGatewayService = natGatewayService;
         this.securityGroupService = securityGroupService;
     }
 
