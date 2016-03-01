@@ -83,20 +83,19 @@ public class RouteService {
         ec2.associateRouteTable(request);
     }
 
-    public boolean routeTableHasRoute(RouteTable routeTable, String cidrBlock, String gatewayId) {
+    public boolean routeTableHasInternetGatewayRoute(RouteTable routeTable, String cidrBlock, String gatewayId) {
         List<Route> routes = routeTable.getRoutes();
 
         return routes.stream()
-                .filter(r -> r.getDestinationCidrBlock().equals(cidrBlock))
-                .filter(r -> r.getGatewayId().equals(gatewayId))
+                .filter(r -> r.getDestinationCidrBlock().equals(cidrBlock) && r.getGatewayId().equals(gatewayId))
                 .findFirst()
                 .isPresent();
     }
 
-    public void addRouteToRouteTable(RouteTable routeTable, String cidrBlock, String gatewayId) {
+    public void addInternetGatewayRoute(RouteTable routeTable, String cidrBlock, String gatewayId) {
         String routeTableId = routeTable.getRouteTableId();
 
-        if (routeTableHasRoute(routeTable, cidrBlock, gatewayId)) {
+        if (routeTableHasInternetGatewayRoute(routeTable, cidrBlock, gatewayId)) {
             Logger.info("Route table [%s] has route to cidr block [%s] for gateway [%s]", routeTableId, cidrBlock, gatewayId);
             return;
         }
@@ -106,6 +105,35 @@ public class RouteService {
                 .withDestinationCidrBlock(cidrBlock)
                 .withRouteTableId(routeTableId);
 
+        createRoute(request, routeTableId, cidrBlock, gatewayId);
+    }
+
+    public boolean routeTableHasNatGatewayRoute(RouteTable routeTable, String cidrBlock, String gatewayId) {
+        List<Route> routes = routeTable.getRoutes();
+
+        return routes.stream()
+                .filter(r -> r.getDestinationCidrBlock().equals(cidrBlock) && r.getNatGatewayId().equals(gatewayId))
+                .findFirst()
+                .isPresent();
+    }
+
+    public void addNatGatewayRoute(RouteTable routeTable, String cidrBlock, String gatewayId) {
+        String routeTableId = routeTable.getRouteTableId();
+
+        if (routeTableHasNatGatewayRoute(routeTable, cidrBlock, gatewayId)) {
+            Logger.info("Route table [%s] has route to cidr block [%s] for gateway [%s]", routeTableId, cidrBlock, gatewayId);
+            return;
+        }
+
+        CreateRouteRequest request = new CreateRouteRequest()
+                .withNatGatewayId(gatewayId)
+                .withDestinationCidrBlock(cidrBlock)
+                .withRouteTableId(routeTableId);
+
+        createRoute(request, routeTableId, cidrBlock, gatewayId);
+    }
+
+    private void createRoute(CreateRouteRequest request, String routeTableId, String cidrBlock, String gatewayId) {
         CreateRouteResult result = ec2.createRoute(request);
 
         if (!result.isReturn()) {

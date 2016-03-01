@@ -14,19 +14,14 @@ import java.util.List;
 
 public class NetworkService {
 
-    private static final int APPLICATION_SERVER_SUBNETS = 1;
-    private static final int DATABASE_SUBNETS = 2;
-
     private final AmazonEC2NameService nameService;
 
     private final VpcService vpcService;
 
     private final SubnetService subnetService;
-
     private final RouteService routeService;
 
     private final InternetGatewayService internetGatewayService;
-
     private final NatGatewayService natGatewayService;
 
     private final SecurityGroupService securityGroupService;
@@ -55,23 +50,29 @@ public class NetworkService {
 
         Vpc vpc = createVpc("10.0.0.0/16");
 
-        Subnet publicSubnet = createSubnet(vpc, zone1, "10.0.0.0/24", "public");
-
         RouteTable publicRouteTable = createRouteTable(vpc, "public");
+
+        Subnet publicSubnet = createSubnet(vpc, zone1, "10.0.0.0/24", "public");
         associateRouteTableWithSubnet(publicRouteTable, publicSubnet);
 
         InternetGateway internetGateway = internetGatewayService.addInternetGateway(vpc);
-        routeService.addRouteToRouteTable(publicRouteTable, "0.0.0.0/0", internetGateway.getInternetGatewayId());
+        routeService.addInternetGatewayRoute(publicRouteTable, "0.0.0.0/0", internetGateway.getInternetGatewayId());
 
-        Subnet privateSubnet1 = createSubnet(vpc, zone1, "10.0.1.0/24", "private-1");
+        RouteTable applicationRouteTable = createRouteTable(vpc, "application");
 
-        RouteTable privateRouteTable1 = createRouteTable(vpc, "private-1");
-        associateRouteTableWithSubnet(privateRouteTable1, privateSubnet1);
+        Subnet applicationSubnet = createSubnet(vpc, zone1, "10.0.20.0/24", "application");
+        associateRouteTableWithSubnet(applicationRouteTable, applicationSubnet);
 
-        Subnet privateSubnet2 = createSubnet(vpc, zone2, "10.0.2.0/24", "private-2");
+        NatGateway natGateway = natGatewayService.addNatGateway(publicSubnet);
+        routeService.addNatGatewayRoute(applicationRouteTable, "0.0.0.0/0", natGateway.getNatGatewayId());
 
-        RouteTable privateRouteTable2 = createRouteTable(vpc, "private-2");
-        associateRouteTableWithSubnet(privateRouteTable2, privateSubnet2);
+        RouteTable databaseRouteTable = createRouteTable(vpc, "database");
+
+        Subnet databaseSubnet1 = createSubnet(vpc, zone1, "10.0.30.0/24", "database-1");
+        associateRouteTableWithSubnet(databaseRouteTable, databaseSubnet1);
+
+        Subnet databaseSubnet2 = createSubnet(vpc, zone2, "10.0.31.0/24", "database-2");
+        associateRouteTableWithSubnet(databaseRouteTable, databaseSubnet2);
 
         SecurityGroup loadBalancerSecurityGroup = createSecurityGroup(vpc, "load-balancer");
 
@@ -85,11 +86,10 @@ public class NetworkService {
 
         return new Network.Builder()
                 .withVpc(vpc)
-                .withApplicationSubnet(privateSubnet1)
-                .withApplicationSubnet(privateSubnet2)
+                .withApplicationSubnet(applicationSubnet)
                 .withApplicationSecurityGroup(applicationSecurityGroup)
-                .withDatabaseSubnet(privateSubnet1)
-                .withDatabaseSubnet(privateSubnet2)
+                .withDatabaseSubnet(databaseSubnet1)
+                .withDatabaseSubnet(databaseSubnet2)
                 .withDatabaseSecurityGroup(databaseSecurityGroup)
                 .withLoadBalancerSubnet(publicSubnet)
                 .withLoadBalancerSecurityGroup(loadBalancerSecurityGroup)
@@ -113,7 +113,7 @@ public class NetworkService {
         return vpc;
     }
 
-    private Subnet createSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock, String nameSuffix) {
+    private Subnet  createSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock, String nameSuffix) {
         Subnet subnet = subnetService.createSubnet(vpc, availabilityZone, cidrBlock);
         nameService.setNameTag(Subnet.class, subnet.getSubnetId(), nameSuffix);
         return subnet;

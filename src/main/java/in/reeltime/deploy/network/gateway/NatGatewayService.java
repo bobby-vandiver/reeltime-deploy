@@ -49,7 +49,7 @@ public class NatGatewayService {
         return result.getNatGateways();
     }
 
-    public NatGateway createNatGateway(Subnet subnet) {
+    public NatGateway addNatGateway(Subnet subnet) {
         String subnetId = subnet.getSubnetId();
 
         if (natGatewayExists(subnet)) {
@@ -57,12 +57,29 @@ public class NatGatewayService {
             return getNatGateway(subnet);
         }
 
+        String vpcId = subnet.getVpcId();
+        String allocationId = allocateElasticIpAddress(vpcId);
+
         CreateNatGatewayRequest request = new CreateNatGatewayRequest()
+                .withAllocationId(allocationId)
                 .withSubnetId(subnetId);
 
-        Logger.info("Creating NAT gateway in subnet [%s]", subnet);
+        Logger.info("Creating NAT gateway in subnet [%s] with allocation id [%s]", subnetId, allocationId);
 
         CreateNatGatewayResult result = ec2.createNatGateway(request);
         return result.getNatGateway();
+    }
+
+    private String allocateElasticIpAddress(String vpcId) {
+        AllocateAddressRequest request = new AllocateAddressRequest()
+                .withDomain(DomainType.Vpc);
+
+        AllocateAddressResult result = ec2.allocateAddress(request);
+
+        String allocationId = result.getAllocationId();
+        String ipAddress = result.getPublicIp();
+
+        Logger.info("Allocated elastic ip address with id [%s] and public ip address [%s]", allocationId, ipAddress);
+        return allocationId;
     }
 }
