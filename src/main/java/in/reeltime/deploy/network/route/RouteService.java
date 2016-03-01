@@ -6,6 +6,7 @@ import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class RouteService {
 
@@ -15,72 +16,64 @@ public class RouteService {
         this.ec2 = ec2;
     }
 
-    public boolean routeTableExists(Vpc vpc, Subnet subnet) {
-        return !getRouteTables(vpc, subnet).isEmpty();
+    public boolean routeTableExists(Vpc vpc, String nameTag) {
+        return getRouteTable(vpc, nameTag) != null;
     }
 
-    public RouteTable getRouteTable(Vpc vpc, Subnet subnet) {
-        List<RouteTable> routeTables = getRouteTables(vpc, subnet);
-
+    public RouteTable getRouteTable(Vpc vpc, String nameTag) {
         String vpcId = vpc.getVpcId();
-        String subnetId = subnet.getSubnetId();
-
-        if (routeTables.isEmpty()) {
-            String message = String.format("Route table does not exist for subnet [%s] in vpc [%s]", subnetId, vpcId);
-            throw new IllegalArgumentException(message);
-        }
-        else if (routeTables.size() > 1) {
-            String message = String.format("Multiple route tables exist for subnet [%s] in vpc [%s]", subnetId, vpcId);
-            throw new IllegalArgumentException(message);
-        }
-
-        return routeTables.get(0);
-    }
-
-    private List<RouteTable> getRouteTables(Vpc vpc, Subnet subnet) {
-        String vpcId = vpc.getVpcId();
-        String subnetId = subnet.getSubnetId();
 
         Filter vpcFilter = new Filter()
                 .withName("vpc-id")
                 .withValues(vpcId);
 
-        Filter subnetFilter = new Filter()
-                .withName("association.subnet-id")
-                .withValues(subnetId);
-
         DescribeRouteTablesRequest request = new DescribeRouteTablesRequest()
-                .withFilters(vpcFilter, subnetFilter);
+                .withFilters(vpcFilter);
 
         DescribeRouteTablesResult result = ec2.describeRouteTables(request);
-        return result.getRouteTables();
-    }
+        List<RouteTable> routeTables = result.getRouteTables();
 
-    public RouteTable createRouteTable(Vpc vpc, Subnet subnet) {
-        if (routeTableExists(vpc, subnet)) {
-            Logger.info("Route table exists for subnet [%s] in vpc [%s]", subnet.getSubnetId(), vpc.getVpcId());
-            return getRouteTable(vpc, subnet);
+        RouteTable routeTable = null;
+
+        for (RouteTable table : routeTables) {
+            Optional<Tag> optionalTag = table.getTags().stream()
+                    .filter(t -> t.getKey().equals("Name") && t.getValue().equals(nameTag))
+                    .findFirst();
+
+            routeTable = optionalTag.isPresent() ? table : routeTable;
         }
 
-        RouteTable routeTable = createRouteTable(vpc);
-        associateRouteTableWithSubnet(routeTable, subnet);
         return routeTable;
     }
 
-    private RouteTable createRouteTable(Vpc vpc) {
+    public RouteTable createRouteTable(Vpc vpc) {
         String vpcId = vpc.getVpcId();
 
         CreateRouteTableRequest request = new CreateRouteTableRequest()
                 .withVpcId(vpcId);
 
         Logger.info("Creating route table in vpc [%s]", vpc);
+
         CreateRouteTableResult result = ec2.createRouteTable(request);
         return result.getRouteTable();
     }
 
-    private void associateRouteTableWithSubnet(RouteTable routeTable, Subnet subnet) {
+    public boolean routeTableAssociatedWithSubnet(RouteTable routeTable, Subnet subnet) {
+        String subnetId = subnet.getSubnetId();
+
+        return routeTable.getAssociations().stream()
+                .filter(a -> a.getSubnetId().equals(subnetId))
+                .findFirst()
+                .isPresent();
+    }
+
+    public void associateRouteTableWithSubnet(RouteTable routeTable, Subnet subnet) {
         String routeTableId = routeTable.getRouteTableId();
         String subnetId = subnet.getSubnetId();
+
+        if (routeTableAssociatedWithSubnet(routeTable, subnet)) {
+            Logger.info("Route table [%s] already associated with subnet [%s]", routeTableId, subnetId);
+        }
 
         AssociateRouteTableRequest request = new AssociateRouteTableRequest()
                 .withRouteTableId(routeTableId)

@@ -20,6 +20,7 @@ import in.reeltime.deploy.name.AmazonEC2NameService;
 import in.reeltime.deploy.name.NameService;
 import in.reeltime.deploy.network.NetworkService;
 import in.reeltime.deploy.network.gateway.InternetGatewayService;
+import in.reeltime.deploy.network.gateway.NatGatewayService;
 import in.reeltime.deploy.network.route.RouteService;
 import in.reeltime.deploy.network.security.IpAddressService;
 import in.reeltime.deploy.network.security.SecurityGroupService;
@@ -56,11 +57,13 @@ public class ServiceFactory {
         RouteService routeService = new RouteService(ec2);
 
         InternetGatewayService internetGatewayService = new InternetGatewayService(ec2);
+        NatGatewayService natGatewayService = new NatGatewayService(ec2);
 
         IpAddressService ipAddressService = new IpAddressService();
         SecurityGroupService securityGroupService = new SecurityGroupService(ec2, ipAddressService);
 
-        return new NetworkService(nameService, vpcService, subnetService, routeService, internetGatewayService, securityGroupService);
+        return new NetworkService(nameService, vpcService, subnetService, routeService,
+                internetGatewayService, natGatewayService, securityGroupService);
     }
 
     public DatabaseService databaseService() {

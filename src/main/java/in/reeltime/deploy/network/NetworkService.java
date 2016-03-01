@@ -14,6 +14,8 @@ import java.util.List;
 
 public class NetworkService {
 
+    private static final int APPLICATION_SERVER_SUBNETS = 1;
+    private static final int DATABASE_SUBNETS = 2;
 
     private final AmazonEC2NameService nameService;
 
@@ -54,16 +56,22 @@ public class NetworkService {
         Vpc vpc = createVpc("10.0.0.0/16");
 
         Subnet publicSubnet = createSubnet(vpc, zone1, "10.0.0.0/24", "public");
-        RouteTable publicRouteTable = createRouteTable(vpc, publicSubnet, "public");
+
+        RouteTable publicRouteTable = createRouteTable(vpc, "public");
+        associateRouteTableWithSubnet(publicRouteTable, publicSubnet);
 
         InternetGateway internetGateway = internetGatewayService.addInternetGateway(vpc);
         routeService.addRouteToRouteTable(publicRouteTable, "0.0.0.0/0", internetGateway.getInternetGatewayId());
 
         Subnet privateSubnet1 = createSubnet(vpc, zone1, "10.0.1.0/24", "private-1");
-        RouteTable privateRouteTable1 = createRouteTable(vpc, privateSubnet1, "private-1");
+
+        RouteTable privateRouteTable1 = createRouteTable(vpc, "private-1");
+        associateRouteTableWithSubnet(privateRouteTable1, privateSubnet1);
 
         Subnet privateSubnet2 = createSubnet(vpc, zone2, "10.0.2.0/24", "private-2");
-        RouteTable privateRouteTable2 = createRouteTable(vpc, privateSubnet2, "private-2");
+
+        RouteTable privateRouteTable2 = createRouteTable(vpc, "private-2");
+        associateRouteTableWithSubnet(privateRouteTable2, privateSubnet2);
 
         SecurityGroup loadBalancerSecurityGroup = createSecurityGroup(vpc, "load-balancer");
 
@@ -91,11 +99,11 @@ public class NetworkService {
 
     private Vpc createVpc(String cidrBlock) {
         Vpc vpc;
+        String name = nameService.getNameForResource(Vpc.class);
 
-        if (nameService.nameTagExists(Vpc.class)) {
+        if (vpcService.vpcExists(name)) {
             Logger.info("Vpc already exists");
-            String vpcName = nameService.getNameForResource(Vpc.class);
-            vpc = vpcService.getVpc(vpcName);
+            vpc = vpcService.getVpc(name);
         }
         else {
             vpc = vpcService.createVpc(cidrBlock);
@@ -111,10 +119,24 @@ public class NetworkService {
         return subnet;
     }
 
-    private RouteTable createRouteTable(Vpc vpc, Subnet subnet, String nameSuffix) {
-        RouteTable routeTable = routeService.createRouteTable(vpc, subnet);
-        nameService.setNameTag(RouteTable.class, routeTable.getRouteTableId(), nameSuffix);
+    private RouteTable createRouteTable(Vpc vpc, String nameSuffix) {
+        RouteTable routeTable;
+        String name = nameService.getNameForResource(RouteTable.class, nameSuffix);
+
+        if (routeService.routeTableExists(vpc, name)) {
+            Logger.info("Route table [%s] exists for in vpc [%s]", name, vpc.getVpcId());
+            routeTable = routeService.getRouteTable(vpc, name);
+        }
+        else {
+            routeTable = routeService.createRouteTable(vpc);
+            nameService.setNameTag(RouteTable.class, routeTable.getRouteTableId(), nameSuffix);
+        }
+
         return routeTable;
+    }
+
+    private void associateRouteTableWithSubnet(RouteTable routeTable, Subnet subnet) {
+        routeService.associateRouteTableWithSubnet(routeTable, subnet);
     }
 
     private SecurityGroup createSecurityGroup(Vpc vpc, String nameSuffix) {
