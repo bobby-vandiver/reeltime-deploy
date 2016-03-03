@@ -1,75 +1,91 @@
 package in.reeltime.deploy.beanstalk.environment;
 
-import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.elasticbeanstalk.model.ConfigurationOptionSetting;
-import com.amazonaws.util.StringUtils;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import in.reeltime.deploy.access.Access;
-import in.reeltime.deploy.network.Network;
+import in.reeltime.deploy.beanstalk.BeanstalkConfiguration;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
 
 public class EnvironmentConfigurationService {
 
-    private static Function<Object, String> GET_SUBNET_ID = (subnet) -> ((Subnet) subnet).getSubnetId();
+    public Collection<ConfigurationOptionSetting> getConfigurationOptionSettings(BeanstalkConfiguration beanstalkConfiguration) {
 
-    public Collection<ConfigurationOptionSetting> getConfigurationOptionSettings(Network network, Access access) {
+        BeanstalkConfiguration.VpcConfiguration vpcConfiguration =
+                beanstalkConfiguration.getVpcConfiguration();
 
         ConfigurationOptionSetting vpcId =
-                vpc("VPCId", network.getVpc().getVpcId());
+                vpc("VPCId", vpcConfiguration.getVpcId());
 
         ConfigurationOptionSetting autoScalingSubnets =
-                vpc("Subnets", csv(network.getApplicationSubnets(), GET_SUBNET_ID));
+                vpc("Subnets", vpcConfiguration.getAutoScalingSubnets());
 
         ConfigurationOptionSetting elasticLoadBalancerSubnets =
-                vpc("ELBSubnets", csv(network.getLoadBalancerSubnets(), GET_SUBNET_ID));
+                vpc("ELBSubnets", vpcConfiguration.getElasticLoadBalancerSubnets());
 
         ConfigurationOptionSetting associatePublicIpAddress =
-                vpc("AssociatePublicIpAddress", "false");
+                vpc("AssociatePublicIpAddress", vpcConfiguration.getAutoScalingSubnets());
+
+        BeanstalkConfiguration.LoadBalancerConfiguration loadBalancerConfiguration =
+                beanstalkConfiguration.getLoadBalancerConfiguration();
 
         ConfigurationOptionSetting loadBalancerSecurityGroups =
-                loadBalancer("SecurityGroups", network.getLoadBalancerSecurityGroup().getGroupId());
+                loadBalancer("SecurityGroups", loadBalancerConfiguration.getSecurityGroups());
 
         ConfigurationOptionSetting loadBalancerManagedSecurityGroup =
-                loadBalancer("ManagedSecurityGroup", network.getLoadBalancerSecurityGroup().getGroupId());
+                loadBalancer("ManagedSecurityGroup", loadBalancerConfiguration.getManagedSecurityGroup());
 
         // TODO: Use aws:elb:listener:[listener_port] options where applicable per Amazon's recommendation
 
         ConfigurationOptionSetting loadBalancerHttpPort =
-                loadBalancer("LoadBalancerHTTPPort", "OFF");
+                loadBalancer("LoadBalancerHTTPPort", loadBalancerConfiguration.getHttpPort());
 
         ConfigurationOptionSetting loadBalancerHttpsPort =
-                loadBalancer("LoadBalancerHTTPSPort", "443");
+                loadBalancer("LoadBalancerHTTPSPort", loadBalancerConfiguration.getHttpsPort());
 
         ConfigurationOptionSetting loadBalancerSslCertificateId =
-                loadBalancer("SSLCertificateId", access.getCertificate().getCertificateArn());
+                loadBalancer("SSLCertificateId", loadBalancerConfiguration.getSslCertificateId());
+
+        BeanstalkConfiguration.LaunchConfiguration launchConfiguration =
+                beanstalkConfiguration.getLaunchConfiguration();
 
         ConfigurationOptionSetting iamInstanceProfile =
-                launchConfiguration("IamInstanceProfile", access.getEc2InstanceProfile().getInstanceProfileName());
+                launchConfiguration("IamInstanceProfile", launchConfiguration.getIamInstanceProfile());
 
         ConfigurationOptionSetting instanceType =
-                launchConfiguration("InstanceType", "t2.micro");
+                launchConfiguration("InstanceType", launchConfiguration.getInstanceType());
 
         ConfigurationOptionSetting instanceSecurityGroups =
-                launchConfiguration("SecurityGroups", network.getApplicationSecurityGroup().getGroupId());
+                launchConfiguration("SecurityGroups", launchConfiguration.getSecurityGroups());
+
+        BeanstalkConfiguration.EnvironmentConfiguration environmentConfiguration =
+                beanstalkConfiguration.getEnvironmentConfiguration();
 
         ConfigurationOptionSetting environmentType =
-                environment("EnvironmentType", "SingleInstance");
+                environment("EnvironmentType", environmentConfiguration.getEnvironmentType());
+
+        BeanstalkConfiguration.ApplicationConfiguration applicationConfiguration =
+                beanstalkConfiguration.getApplicationConfiguration();
 
         ConfigurationOptionSetting healthCheckUrl =
-                application("Application Healthcheck URL", "/aws/available");
+                application("Application Healthcheck URL", applicationConfiguration.getHealthCheckUrl());
+
+        BeanstalkConfiguration.ApplicationEnvironmentConfiguration applicationEnvironmentConfiguration =
+                beanstalkConfiguration.getApplicationEnvironmentConfiguration();
+
+        ConfigurationOptionSetting jdbcConnectionString =
+                applicationEnvironment("JDBC_CONNECTION_STRING", applicationEnvironmentConfiguration.getJdbcConnectionString());
+
+        BeanstalkConfiguration.TomcatJvmConfiguration tomcatJvmConfiguration =
+                beanstalkConfiguration.getTomcatJvmConfiguration();
 
         ConfigurationOptionSetting jvmMaxHeapSize =
-                tomcatJvm("Xmx", "512m");
+                tomcatJvm("Xmx", tomcatJvmConfiguration.getMaxHeapSize());
 
         ConfigurationOptionSetting jvmMaxPermSize =
-                tomcatJvm("XX:MaxPermSize", "512m");
+                tomcatJvm("XX:MaxPermSize", tomcatJvmConfiguration.getMaxPermSize());
 
         ConfigurationOptionSetting jvmInitHeapSize =
-                tomcatJvm("Xms", "256m");
+                tomcatJvm("Xms", tomcatJvmConfiguration.getInitHeapSize());
 
         return new ImmutableList.Builder<ConfigurationOptionSetting>()
                 .add(vpcId)
@@ -84,6 +100,7 @@ public class EnvironmentConfigurationService {
                 .add(instanceSecurityGroups)
                 .add(environmentType)
                 .add(healthCheckUrl)
+                .add(jdbcConnectionString)
                 .add(jvmMaxHeapSize)
                 .add(jvmMaxPermSize)
                 .add(jvmInitHeapSize)
@@ -106,6 +123,10 @@ public class EnvironmentConfigurationService {
         return optionSetting("aws:elasticbeanstalk:application", optionName, value);
     }
 
+    private ConfigurationOptionSetting applicationEnvironment(String optionName, String value) {
+        return optionSetting("aws:elasticbeanstalk:application:environment", optionName, value);
+    }
+
     private ConfigurationOptionSetting loadBalancer(String optionName, String value) {
         return optionSetting("aws:elb:loadbalancer", optionName, value);
     }
@@ -116,21 +137,5 @@ public class EnvironmentConfigurationService {
 
     private ConfigurationOptionSetting optionSetting(String namespace, String optionName, String value) {
         return new ConfigurationOptionSetting(namespace, optionName, value);
-    }
-
-    private String csv(Collection collection, Function<Object, String> function) {
-        List<String> list = Lists.newArrayList();
-
-        for (Object obj : collection) {
-            try {
-                String value = function.apply(obj);
-                list.add(value);
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        return StringUtils.join(",", (String[]) list.toArray());
     }
 }

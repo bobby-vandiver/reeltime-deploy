@@ -34,6 +34,6 @@ public class DatabaseService {
         DBInstance instance = databaseInstanceService.createInstance(identifier, databaseName, securityGroup, subnetGroup);
         instance = databaseInstanceService.waitForInstance(instance);
 
-        return null;
+        return new Database(databaseName, instance);
     }
 }

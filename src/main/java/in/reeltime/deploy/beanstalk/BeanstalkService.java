@@ -9,6 +9,7 @@ import in.reeltime.deploy.beanstalk.application.ApplicationService;
 import in.reeltime.deploy.beanstalk.application.ApplicationVersionService;
 import in.reeltime.deploy.beanstalk.environment.EnvironmentService;
 import in.reeltime.deploy.configuration.DeploymentConfiguration;
+import in.reeltime.deploy.database.Database;
 import in.reeltime.deploy.log.Logger;
 import in.reeltime.deploy.network.Network;
 import in.reeltime.deploy.notification.subscription.SubscriptionService;
@@ -81,11 +82,14 @@ public class BeanstalkService {
         EnvironmentDescription environment = null;
 
         if (!production) {
-            Network network = deploymentConfiguration.getNetwork();
-            Access access = deploymentConfiguration.getAccess();
+            BeanstalkConfiguration configuration = new BeanstalkConfiguration(
+                    deploymentConfiguration.getNetwork(),
+                    deploymentConfiguration.getAccess(),
+                    deploymentConfiguration.getDatabase()
+            );
 
             Logger.info("Creating new non-production environment [%s]", environmentName);
-            environment = environmentService.createEnvironment(environmentName, applicationName, applicationVersion, network, access);
+            environment = environmentService.createEnvironment(environmentName, applicationName, applicationVersion, configuration);
         }
 
         Topic transcoderTopic = deploymentConfiguration.getTranscoder().getTopic();

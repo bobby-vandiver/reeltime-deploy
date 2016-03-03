@@ -3,6 +3,7 @@ package in.reeltime.deploy.beanstalk.environment;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.model.*;
 import in.reeltime.deploy.access.Access;
+import in.reeltime.deploy.beanstalk.BeanstalkConfiguration;
 import in.reeltime.deploy.condition.ConditionalService;
 import in.reeltime.deploy.log.Logger;
 import in.reeltime.deploy.network.Network;
@@ -73,7 +74,7 @@ public class EnvironmentService {
     }
 
     public EnvironmentDescription createEnvironment(String environmentName, String applicationName, String versionLabel,
-                                                    Network network, Access access) {
+                                                    BeanstalkConfiguration beanstalkConfiguration) {
         String solutionStack = "64bit Amazon Linux 2015.03 v1.3.1 running Tomcat 8 Java 8";
 
         // The application server will always be a web server
@@ -83,7 +84,7 @@ public class EnvironmentService {
                 .withVersion("1.0");
 
         Collection<ConfigurationOptionSetting> optionSettings =
-                environmentConfigurationService.getConfigurationOptionSettings(network, access);
+                environmentConfigurationService.getConfigurationOptionSettings(beanstalkConfiguration);
 
         CreateEnvironmentRequest request = new CreateEnvironmentRequest()
                 .withApplicationName(applicationName)
