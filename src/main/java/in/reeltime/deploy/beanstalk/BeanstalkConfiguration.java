@@ -54,7 +54,7 @@ public class BeanstalkConfiguration {
         );
 
         this.environmentConfiguration = new EnvironmentConfiguration(
-                "SingleInstance"
+                "LoadBalanced"
         );
 
         this.applicationConfiguration = new ApplicationConfiguration(
