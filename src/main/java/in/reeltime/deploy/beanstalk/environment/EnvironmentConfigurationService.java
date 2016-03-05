@@ -113,6 +113,8 @@ public class EnvironmentConfigurationService {
                 .add(autoScalingSubnets)
                 .add(elasticLoadBalancerSubnets)
                 .add(associatePublicIpAddress)
+                .add(loadBalancerSecurityGroups)
+                .add(loadBalancerManagedSecurityGroup)
                 .add(loadBalancerHttpPort)
                 .add(loadBalancerHttpsPort)
                 .add(loadBalancerSslCertificateId)
