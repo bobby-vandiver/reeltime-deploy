@@ -1,6 +1,5 @@
 package in.reeltime.deploy.network.gateway;
 
-import com.amazonaws.services.dynamodbv2.xspec.S;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import in.reeltime.deploy.log.Logger;

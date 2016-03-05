@@ -1,6 +1,9 @@
 package in.reeltime.deploy.name;
 
-import com.amazonaws.services.ec2.model.*;
+import com.amazonaws.services.ec2.model.RouteTable;
+import com.amazonaws.services.ec2.model.SecurityGroup;
+import com.amazonaws.services.ec2.model.Subnet;
+import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.elastictranscoder.model.Pipeline;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.rds.model.DBInstance;

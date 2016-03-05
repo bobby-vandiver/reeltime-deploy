@@ -2,9 +2,6 @@ package in.reeltime.deploy.database;
 
 import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.rds.model.DBSubnetGroup;
-import com.google.common.collect.Lists;
-
-import java.util.List;
 
 public class DatabaseConfiguration {
 

@@ -2,11 +2,9 @@ package in.reeltime.deploy.beanstalk.environment;
 
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.model.*;
-import in.reeltime.deploy.access.Access;
 import in.reeltime.deploy.beanstalk.BeanstalkConfiguration;
 import in.reeltime.deploy.condition.ConditionalService;
 import in.reeltime.deploy.log.Logger;
-import in.reeltime.deploy.network.Network;
 
 import java.util.Collection;
 import java.util.List;

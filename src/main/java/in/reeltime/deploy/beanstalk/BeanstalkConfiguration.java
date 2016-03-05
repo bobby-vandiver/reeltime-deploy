@@ -1,7 +1,6 @@
 package in.reeltime.deploy.beanstalk;
 
 import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.Endpoint;
 import com.amazonaws.util.StringUtils;
 import com.google.common.collect.Lists;

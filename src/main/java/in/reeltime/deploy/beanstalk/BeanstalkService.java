@@ -2,16 +2,12 @@ package in.reeltime.deploy.beanstalk;
 
 import com.amazonaws.services.elasticbeanstalk.model.EnvironmentDescription;
 import com.amazonaws.services.s3.model.Bucket;
-import com.amazonaws.services.sns.model.Subscription;
 import com.amazonaws.services.sns.model.Topic;
-import in.reeltime.deploy.access.Access;
 import in.reeltime.deploy.beanstalk.application.ApplicationService;
 import in.reeltime.deploy.beanstalk.application.ApplicationVersionService;
 import in.reeltime.deploy.beanstalk.environment.EnvironmentService;
 import in.reeltime.deploy.configuration.DeploymentConfiguration;
-import in.reeltime.deploy.database.Database;
 import in.reeltime.deploy.log.Logger;
-import in.reeltime.deploy.network.Network;
 import in.reeltime.deploy.notification.subscription.SubscriptionService;
 import in.reeltime.deploy.storage.Storage;
 import in.reeltime.deploy.storage.object.ObjectService;
