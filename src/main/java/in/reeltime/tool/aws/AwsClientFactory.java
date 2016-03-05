@@ -6,6 +6,8 @@ import com.amazonaws.services.certificatemanager.AWSCertificateManager;
 import com.amazonaws.services.certificatemanager.AWSCertificateManagerClient;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
+import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClient;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoderClient;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
@@ -32,6 +34,10 @@ public class AwsClientFactory {
 
     public AWSCertificateManager acm() {
         return new AWSCertificateManagerClient(credentials);
+    }
+
+    public AWSElasticBeanstalk eb() {
+        return new AWSElasticBeanstalkClient(credentials);
     }
 
     public AmazonEC2 ec2() {

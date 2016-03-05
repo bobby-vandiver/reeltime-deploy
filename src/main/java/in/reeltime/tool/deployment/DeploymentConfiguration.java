@@ -1,4 +1,4 @@
-package in.reeltime.tool.configuration;
+package in.reeltime.tool.deployment;
 
 import in.reeltime.tool.access.Access;
 import in.reeltime.tool.database.Database;

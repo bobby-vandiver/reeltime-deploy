@@ -2,6 +2,7 @@ package in.reeltime.tool.factory;
 
 import com.amazonaws.services.certificatemanager.AWSCertificateManager;
 import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.rds.AmazonRDS;
@@ -12,10 +13,16 @@ import in.reeltime.tool.access.certificate.CertificateService;
 import in.reeltime.tool.access.profile.InstanceProfileService;
 import in.reeltime.tool.access.role.RoleService;
 import in.reeltime.tool.aws.AwsClientFactory;
+import in.reeltime.tool.beanstalk.BeanstalkService;
+import in.reeltime.tool.beanstalk.application.ApplicationService;
+import in.reeltime.tool.beanstalk.application.ApplicationVersionService;
+import in.reeltime.tool.beanstalk.environment.EnvironmentConfigurationService;
+import in.reeltime.tool.beanstalk.environment.EnvironmentService;
 import in.reeltime.tool.condition.ConditionalService;
 import in.reeltime.tool.database.DatabaseService;
 import in.reeltime.tool.database.instance.DatabaseInstanceService;
 import in.reeltime.tool.database.subnet.DatabaseSubnetGroupService;
+import in.reeltime.tool.deployment.DeploymentService;
 import in.reeltime.tool.name.AmazonEC2NameService;
 import in.reeltime.tool.name.NameService;
 import in.reeltime.tool.network.NetworkService;
@@ -26,10 +33,12 @@ import in.reeltime.tool.network.security.IpAddressService;
 import in.reeltime.tool.network.security.SecurityGroupService;
 import in.reeltime.tool.network.subnet.SubnetService;
 import in.reeltime.tool.network.vpc.VpcService;
+import in.reeltime.tool.notification.subscription.SubscriptionService;
 import in.reeltime.tool.notification.topic.TopicService;
 import in.reeltime.tool.resource.ResourceService;
 import in.reeltime.tool.storage.StorageService;
 import in.reeltime.tool.storage.bucket.BucketService;
+import in.reeltime.tool.storage.object.ObjectService;
 import in.reeltime.tool.transcoder.TranscoderService;
 import in.reeltime.tool.transcoder.pipeline.PipelineService;
 
@@ -112,5 +121,29 @@ public class ServiceFactory {
         CertificateService certificateService = new CertificateService(acm);
 
         return new AccessService(nameService, roleService, instanceProfileService, certificateService);
+    }
+
+    public BeanstalkService beanstalkService() {
+        AWSElasticBeanstalk eb = awsClientFactory.eb();
+
+        AmazonS3 s3 = awsClientFactory.s3();
+        AmazonSNS sns = awsClientFactory.sns();
+
+        ConditionalService conditionalService = new ConditionalService();
+        ObjectService objectService = new ObjectService(s3, conditionalService);
+
+        EnvironmentConfigurationService environmentConfigurationService = new EnvironmentConfigurationService();
+        EnvironmentService environmentService = new EnvironmentService(eb, environmentConfigurationService, conditionalService);
+
+        ApplicationService applicationService = new ApplicationService(eb);
+        ApplicationVersionService applicationVersionService = new ApplicationVersionService(eb, objectService);
+
+        SubscriptionService subscriptionService = new SubscriptionService(sns);
+
+        return new BeanstalkService(environmentService, applicationService, applicationVersionService, objectService, subscriptionService);
+    }
+
+    public DeploymentService deploymentService() {
+        return new DeploymentService(networkService(), databaseService(), storageService(), accessService(), transcoderService(), beanstalkService());
     }
 }

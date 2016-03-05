@@ -6,7 +6,7 @@ import com.amazonaws.services.sns.model.Topic;
 import in.reeltime.tool.beanstalk.application.ApplicationService;
 import in.reeltime.tool.beanstalk.application.ApplicationVersionService;
 import in.reeltime.tool.beanstalk.environment.EnvironmentService;
-import in.reeltime.tool.configuration.DeploymentConfiguration;
+import in.reeltime.tool.deployment.DeploymentConfiguration;
 import in.reeltime.tool.log.Logger;
 import in.reeltime.tool.notification.subscription.SubscriptionService;
 import in.reeltime.tool.storage.Storage;

@@ -3,6 +3,7 @@ package in.reeltime.tool;
 import in.reeltime.tool.access.Access;
 import in.reeltime.tool.access.AccessService;
 import in.reeltime.tool.access.role.RolePolicyParameters;
+import in.reeltime.tool.deployment.DeploymentService;
 import in.reeltime.tool.factory.ServiceFactory;
 import in.reeltime.tool.log.Logger;
 import in.reeltime.tool.network.Network;
@@ -39,29 +40,8 @@ public class Application {
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
-            NetworkService networkService = serviceFactory.networkService();
-            Network network = networkService.setupNetwork();
-//
-//            DatabaseService databaseService = serviceFactory.databaseService();
-//            Database database = databaseService.setupDatabase(network);
-
-            StorageService storageService = serviceFactory.storageService();
-            Storage storage = storageService.setupStorage();
-
-            TranscoderService transcoderService = serviceFactory.transcoderService();
-            String transcoderTopicName = transcoderService.getTranscoderTopicName();
-
-            RolePolicyParameters rolePolicyParameters = new RolePolicyParameters(
-                    accountId,
-                    storage.getMasterVideosBucket(),
-                    storage.getThumbnailsBucket(),
-                    storage.getPlaylistsAndSegmentsBucket(),
-                    transcoderTopicName);
-
-            AccessService accessService = serviceFactory.accessService();
-            Access access = accessService.setupAccess(rolePolicyParameters);
-
-//            Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
+            DeploymentService deploymentService = serviceFactory.deploymentService();
+//            deploymentService.deploy(accountId, environmentName,);
 
             System.out.println("Success!");
         }
