@@ -4,16 +4,16 @@ import com.amazonaws.services.rds.model.DBInstance;
 
 public class Database {
 
-    private final String databaseName;
+    private final DatabaseConfiguration configuration;
     private final DBInstance dbInstance;
 
-    public Database(String databaseName, DBInstance dbInstance) {
-        this.databaseName = databaseName;
+    public Database(DatabaseConfiguration configuration, DBInstance dbInstance) {
+        this.configuration = configuration;
         this.dbInstance = dbInstance;
     }
 
     public String getDatabaseName() {
-        return databaseName;
+        return configuration.getDbName();
     }
 
     public DBInstance getDbInstance() {

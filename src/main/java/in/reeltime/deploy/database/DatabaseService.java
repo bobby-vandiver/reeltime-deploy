@@ -23,6 +23,15 @@ public class DatabaseService {
     }
 
     public Database setupDatabase(Network network) {
+        DatabaseConfiguration configuration = getConfiguration(network);
+
+        DBInstance instance = databaseInstanceService.createInstance(configuration);
+        instance = databaseInstanceService.waitForInstance(instance);
+
+        return new Database(configuration, instance);
+    }
+
+    private DatabaseConfiguration getConfiguration(Network network) {
         String groupName = nameService.getNameForResource(DBSubnetGroup.class);
         DBSubnetGroup subnetGroup = databaseSubnetGroupService.createSubnetGroup(groupName, network.getDatabaseSubnets());
 
@@ -31,9 +40,14 @@ public class DatabaseService {
 
         SecurityGroup securityGroup = network.getDatabaseSecurityGroup();
 
-        DBInstance instance = databaseInstanceService.createInstance(identifier, databaseName, securityGroup, subnetGroup);
-        instance = databaseInstanceService.waitForInstance(instance);
-
-        return new Database(databaseName, instance);
+        return new DatabaseConfiguration.Builder()
+                .withCredentials("master", "superSecret")
+                .withDBInstanceClass("db.t1.micro")
+                .withDBInstanceIdentifier(identifier)
+                .withDBName(databaseName)
+                .withDBSubnetGroup(subnetGroup)
+                .withEngine("MySQL", "5.6.27")
+                .withSecurityGroup(securityGroup)
+                .build();
     }
 }

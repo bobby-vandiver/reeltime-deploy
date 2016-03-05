@@ -5,6 +5,7 @@ import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.*;
 import com.google.common.collect.Lists;
 import in.reeltime.deploy.condition.ConditionalService;
+import in.reeltime.deploy.database.DatabaseConfiguration;
 import in.reeltime.deploy.log.Logger;
 
 import java.util.List;
@@ -28,8 +29,23 @@ public class DatabaseInstanceService {
         this.conditionalService = conditionalService;
     }
 
-    public DBInstance createInstance(String identifier, String databaseName,
-                                     SecurityGroup securityGroup, DBSubnetGroup subnetGroup) {
+    public DBInstance createInstance(DatabaseConfiguration configuration) {
+
+        String databaseName = configuration.getDbName();
+
+        String instanceClass = configuration.getDbInstanceClass();
+        String instanceIdentifier = configuration.getDbInstanceIdentifier();
+
+        DBSubnetGroup subnetGroup = configuration.getDbSubnetGroup();
+
+        String engine = configuration.getEngine();
+        String engineVersion = configuration.getEngineVersion();
+
+        String username = configuration.getMasterUsername();
+        String password = configuration.getMasterPassword();
+
+        SecurityGroup securityGroup = configuration.getSecurityGroup();
+
         String subnetGroupName = subnetGroup.getDBSubnetGroupName();
         List<String> securityGroupIds = Lists.newArrayList(securityGroup.getGroupId());
 
@@ -37,18 +53,18 @@ public class DatabaseInstanceService {
                 .withAllocatedStorage(5)
                 .withAutoMinorVersionUpgrade(false)
                 .withDBName(databaseName)
-                .withDBInstanceClass("db.t1.micro")
-                .withDBInstanceIdentifier(identifier)
+                .withDBInstanceClass(instanceClass)
+                .withDBInstanceIdentifier(instanceIdentifier)
                 .withDBSubnetGroupName(subnetGroupName)
-                .withEngine("MySQL")
-                .withEngineVersion("5.6.27")
-                .withMasterUsername("master")
-                .withMasterUserPassword("superSecret")
+                .withEngine(engine)
+                .withEngineVersion(engineVersion)
+                .withMasterUsername(username)
+                .withMasterUserPassword(password)
                 .withMultiAZ(false)
                 .withStorageEncrypted(false)
                 .withVpcSecurityGroupIds(securityGroupIds);
 
-        Logger.info("Creating database instance with identifier [%s] and database [%s]", identifier, databaseName);
+        Logger.info("Creating database instance with identifier [%s] and database [%s]", instanceIdentifier, databaseName);
         return rds.createDBInstance(request);
     }
 
