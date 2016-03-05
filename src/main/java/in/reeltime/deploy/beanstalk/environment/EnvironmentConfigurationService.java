@@ -75,6 +75,27 @@ public class EnvironmentConfigurationService {
         ConfigurationOptionSetting jdbcConnectionString =
                 applicationEnvironment("JDBC_CONNECTION_STRING", applicationEnvironmentConfiguration.getJdbcConnectionString());
 
+        ConfigurationOptionSetting databaseUsername =
+                applicationEnvironment("DATABASE_USERNAME", applicationEnvironmentConfiguration.getDatabaseUsername());
+
+        ConfigurationOptionSetting databasePassword =
+                applicationEnvironment("DATABASE_PASSWORD", applicationEnvironmentConfiguration.getDatabasePassword());
+
+        ConfigurationOptionSetting masterVideosBucketName =
+                applicationEnvironment("MASTER_VIDEOS_BUCKET_NAME", applicationEnvironmentConfiguration.getMasterVideosBucketName());
+
+        ConfigurationOptionSetting playlistsAndSegmentsBucketName =
+                applicationEnvironment("PLAYLISTS_AND_SEGMENTS_BUCKET_NAME", applicationEnvironmentConfiguration.getPlaylistsAndSegmentsBucketName());
+
+        ConfigurationOptionSetting thumbnailsBucketName =
+                applicationEnvironment("THUMBNAILS_BUCKET_NAME", applicationEnvironmentConfiguration.getThumbnailsBucketName());
+
+        ConfigurationOptionSetting transcoderPipelineName =
+                applicationEnvironment("TRANSCODER_PIPELINE_NAME", applicationEnvironmentConfiguration.getTranscoderPipelineName());
+
+        ConfigurationOptionSetting bcryptCostFactor =
+                applicationEnvironment("BCRYPT_COST_FACTOR", applicationEnvironmentConfiguration.getBcryptCostFactor());
+
         BeanstalkConfiguration.TomcatJvmConfiguration tomcatJvmConfiguration =
                 beanstalkConfiguration.getTomcatJvmConfiguration();
 
@@ -101,6 +122,13 @@ public class EnvironmentConfigurationService {
                 .add(environmentType)
                 .add(healthCheckUrl)
                 .add(jdbcConnectionString)
+                .add(databaseUsername)
+                .add(databasePassword)
+                .add(masterVideosBucketName)
+                .add(playlistsAndSegmentsBucketName)
+                .add(thumbnailsBucketName)
+                .add(transcoderPipelineName)
+                .add(bcryptCostFactor)
                 .add(jvmMaxHeapSize)
                 .add(jvmMaxPermSize)
                 .add(jvmInitHeapSize)

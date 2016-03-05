@@ -81,7 +81,9 @@ public class BeanstalkService {
             BeanstalkConfiguration configuration = new BeanstalkConfiguration(
                     deploymentConfiguration.getNetwork(),
                     deploymentConfiguration.getAccess(),
-                    deploymentConfiguration.getDatabase()
+                    deploymentConfiguration.getStorage(),
+                    deploymentConfiguration.getDatabase(),
+                    deploymentConfiguration.getTranscoder()
             );
 
             Logger.info("Creating new non-production environment [%s]", environmentName);

@@ -17,6 +17,10 @@ public class Transcoder {
         return topic;
     }
 
+    public Pipeline getPipeline() {
+        return pipeline;
+    }
+
     public static class Builder {
         private Topic topic;
         private Pipeline pipeline;

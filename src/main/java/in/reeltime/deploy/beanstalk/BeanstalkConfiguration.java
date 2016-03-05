@@ -7,6 +7,8 @@ import com.google.common.collect.Lists;
 import in.reeltime.deploy.access.Access;
 import in.reeltime.deploy.database.Database;
 import in.reeltime.deploy.network.Network;
+import in.reeltime.deploy.storage.Storage;
+import in.reeltime.deploy.transcoder.Transcoder;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +32,7 @@ public class BeanstalkConfiguration {
 
     private final TomcatJvmConfiguration tomcatJvmConfiguration;
 
-    public BeanstalkConfiguration(Network network, Access access, Database database) {
+    public BeanstalkConfiguration(Network network, Access access, Storage storage, Database database, Transcoder transcoder) {
         this.vpcConfiguration = new VpcConfiguration(
                 network.getVpc().getVpcId(),
                 csv(network.getApplicationSubnets(), GET_SUBNET_ID),
@@ -61,7 +63,14 @@ public class BeanstalkConfiguration {
         );
 
         this.applicationEnvironmentConfiguration = new ApplicationEnvironmentConfiguration(
-                getJdbcConnectionString(database)
+                getJdbcConnectionString(database),
+                database.getConfiguration().getMasterUsername(),
+                database.getConfiguration().getMasterPassword(),
+                storage.getMasterVideosBucket().getName(),
+                storage.getPlaylistsAndSegmentsBucket().getName(),
+                storage.getThumbnailsBucket().getName(),
+                transcoder.getPipeline().getName(),
+                "10"
         );
 
         this.tomcatJvmConfiguration = new TomcatJvmConfiguration(
@@ -103,7 +112,7 @@ public class BeanstalkConfiguration {
         Endpoint endpoint = database.getDbInstance().getEndpoint();
 
         return String.format("jdbc:mysql://%s:%s/%s",
-                endpoint.getAddress(), endpoint.getPort(), database.getDatabaseName());
+                endpoint.getAddress(), endpoint.getPort(), database.getConfiguration().getDbName());
     }
 
 
@@ -241,13 +250,58 @@ public class BeanstalkConfiguration {
 
     public static class ApplicationEnvironmentConfiguration {
         private final String jdbcConnectionString;
+        private final String databaseUsername;
+        private final String databasePassword;
+        private final String masterVideosBucketName;
+        private final String playlistsAndSegmentsBucketName;
+        private final String thumbnailsBucketName;
+        private final String transcoderPipelineName;
+        private final String bcryptCostFactor;
 
-        private ApplicationEnvironmentConfiguration(String jdbcConnectionString) {
+        private ApplicationEnvironmentConfiguration(String jdbcConnectionString, String databaseUsername,
+                                                   String databasePassword, String masterVideosBucketName,
+                                                   String playlistsAndSegmentsBucketName, String thumbnailsBucketName,
+                                                   String transcoderPipelineName, String bcryptCostFactor) {
             this.jdbcConnectionString = jdbcConnectionString;
+            this.databaseUsername = databaseUsername;
+            this.databasePassword = databasePassword;
+            this.masterVideosBucketName = masterVideosBucketName;
+            this.playlistsAndSegmentsBucketName = playlistsAndSegmentsBucketName;
+            this.thumbnailsBucketName = thumbnailsBucketName;
+            this.transcoderPipelineName = transcoderPipelineName;
+            this.bcryptCostFactor = bcryptCostFactor;
         }
 
         public String getJdbcConnectionString() {
             return jdbcConnectionString;
+        }
+
+        public String getDatabaseUsername() {
+            return databaseUsername;
+        }
+
+        public String getDatabasePassword() {
+            return databasePassword;
+        }
+
+        public String getMasterVideosBucketName() {
+            return masterVideosBucketName;
+        }
+
+        public String getPlaylistsAndSegmentsBucketName() {
+            return playlistsAndSegmentsBucketName;
+        }
+
+        public String getThumbnailsBucketName() {
+            return thumbnailsBucketName;
+        }
+
+        public String getTranscoderPipelineName() {
+            return transcoderPipelineName;
+        }
+
+        public String getBcryptCostFactor() {
+            return bcryptCostFactor;
         }
     }
 

@@ -12,8 +12,8 @@ public class Database {
         this.dbInstance = dbInstance;
     }
 
-    public String getDatabaseName() {
-        return configuration.getDbName();
+    public DatabaseConfiguration getConfiguration() {
+        return configuration;
     }
 
     public DBInstance getDbInstance() {
