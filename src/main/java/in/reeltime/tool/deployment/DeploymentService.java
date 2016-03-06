@@ -41,7 +41,7 @@ public class DeploymentService {
         this.beanstalkService = beanstalkService;
     }
 
-    public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
+    public void create(String accountId, String environmentName, String applicationName, String applicationVersion,
                        File war, boolean production) throws FileNotFoundException {
         Network network = networkService.setupNetwork();
         Database database = databaseService.setupDatabase(network);
