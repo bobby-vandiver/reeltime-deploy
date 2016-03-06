@@ -91,6 +91,6 @@ public class Application {
     }
 
     private static Option option(String longOpt, boolean hasArg, String description) {
-        new Option(null, longOpt, hasArg, description);
+        return new Option(null, longOpt, hasArg, description);
     }
 }
