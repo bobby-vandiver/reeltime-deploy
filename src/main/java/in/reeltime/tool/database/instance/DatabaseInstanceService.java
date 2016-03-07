@@ -29,12 +29,33 @@ public class DatabaseInstanceService {
         this.conditionalService = conditionalService;
     }
 
+    public boolean instanceExists(String identifier) {
+        return getInstance(identifier) != null;
+    }
+
+    public DBInstance getInstance(String identifier) {
+        List<DBInstance> instances = getInstances(identifier);
+        return !instances.isEmpty() ? instances.get(0) : null;
+    }
+
+    private List<DBInstance> getInstances(String identifier) {
+        DescribeDBInstancesRequest request = new DescribeDBInstancesRequest()
+                .withDBInstanceIdentifier(identifier);
+
+        DescribeDBInstancesResult result = rds.describeDBInstances(request);
+        return result.getDBInstances();
+    }
+
     public DBInstance createInstance(DatabaseConfiguration configuration) {
+        String instanceIdentifier = configuration.getDbInstanceIdentifier();
+
+        if (instanceExists(instanceIdentifier)) {
+            Logger.info("Database instance with identifier [%s] already exists", instanceIdentifier);
+            return getInstance(instanceIdentifier);
+        }
 
         String databaseName = configuration.getDbName();
-
         String instanceClass = configuration.getDbInstanceClass();
-        String instanceIdentifier = configuration.getDbInstanceIdentifier();
 
         DBSubnetGroup subnetGroup = configuration.getDbSubnetGroup();
 
@@ -68,24 +89,21 @@ public class DatabaseInstanceService {
         return rds.createDBInstance(request);
     }
 
-    public DBInstance getInstance(String identifier) {
-        DescribeDBInstancesRequest request = new DescribeDBInstancesRequest()
-                .withDBInstanceIdentifier(identifier);
+    public void deleteInstance(DatabaseConfiguration configuration) {
+        String instanceIdentifier = configuration.getDbInstanceIdentifier();
 
-        DescribeDBInstancesResult result = rds.describeDBInstances(request);
-        List<DBInstance> instances = result.getDBInstances();
-
-        if (instances.isEmpty()) {
-            throw new IllegalArgumentException("Unknown database identifier: " + identifier);
-        }
-        else if (instances.size() > 1) {
-            throw new IllegalStateException("Found multiple database instances with identifier: " + identifier);
+        if (!instanceExists(instanceIdentifier)) {
+            Logger.info("Database instance [%s] does not exist", instanceIdentifier);
+            return;
         }
 
-        return instances.get(0);
+        Logger.info("Deleting database instance [%s]", instanceIdentifier);
+
+        DeleteDBInstanceRequest request = new DeleteDBInstanceRequest(instanceIdentifier);
+        rds.deleteDBInstance(request);
     }
 
-    public DBInstance waitForInstance(DBInstance instance) {
+    public DBInstance waitForInstanceToBecomeAvailable(DBInstance instance) {
         String identifier = instance.getDBInstanceIdentifier();
 
         String statusMessage = String.format(WAITING_FOR_AVAILABLE_STATUS_FORMAT, identifier);

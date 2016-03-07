@@ -2,8 +2,7 @@ package in.reeltime.tool.database.subnet;
 
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.rds.AmazonRDS;
-import com.amazonaws.services.rds.model.CreateDBSubnetGroupRequest;
-import com.amazonaws.services.rds.model.DBSubnetGroup;
+import com.amazonaws.services.rds.model.*;
 import com.google.common.collect.Lists;
 import in.reeltime.tool.log.Logger;
 
@@ -19,6 +18,25 @@ public class DatabaseSubnetGroupService {
         this.rds = rds;
     }
 
+    public boolean subnetGroupExists(String groupName) {
+        return getSubnetGroup(groupName) != null;
+    }
+
+    public DBSubnetGroup getSubnetGroup(String groupName) {
+        List<DBSubnetGroup> groups = getSubnetGroups(groupName);
+        return !groups.isEmpty() ? groups.get(0) : null;
+    }
+
+    private List<DBSubnetGroup> getSubnetGroups(String groupName) {
+        DescribeDBSubnetGroupsRequest request = new DescribeDBSubnetGroupsRequest()
+                .withDBSubnetGroupName(groupName);
+
+        Logger.info("Getting DB subnet group [%s]", groupName);
+
+        DescribeDBSubnetGroupsResult result = rds.describeDBSubnetGroups(request);
+        return result.getDBSubnetGroups();
+    }
+
     public DBSubnetGroup createSubnetGroup(String groupName, List<Subnet> subnets) {
         List<String> subnetIds = collectSubnetIds(subnets);
         String description = String.format(DESCRIPTION_FORMAT, groupName);
@@ -30,6 +48,20 @@ public class DatabaseSubnetGroupService {
 
         Logger.info("Creating database subnet group [%s]", groupName);
         return rds.createDBSubnetGroup(request);
+    }
+
+    public void deleteSubnetGroup(String groupName) {
+        if (!subnetGroupExists(groupName)) {
+            Logger.info("DB subnet group [%s] does not exist", groupName);
+            return;
+        }
+
+        Logger.info("Deleting DB subnet group [%s]", groupName);
+
+        DeleteDBSubnetGroupRequest request = new DeleteDBSubnetGroupRequest()
+                .withDBSubnetGroupName(groupName);
+
+        rds.deleteDBSubnetGroup(request);
     }
 
     private List<String> collectSubnetIds(List<Subnet> subnets) {

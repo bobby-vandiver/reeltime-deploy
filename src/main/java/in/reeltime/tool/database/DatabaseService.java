@@ -26,7 +26,7 @@ public class DatabaseService {
         DatabaseConfiguration configuration = getConfiguration(network);
 
         DBInstance instance = databaseInstanceService.createInstance(configuration);
-        instance = databaseInstanceService.waitForInstance(instance);
+        instance = databaseInstanceService.waitForInstanceToBecomeAvailable(instance);
 
         return new Database(configuration, instance);
     }

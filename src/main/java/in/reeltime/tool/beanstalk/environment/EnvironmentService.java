@@ -95,7 +95,10 @@ public class EnvironmentService {
         Logger.info("Creating environment [%s]", environmentName);
         CreateEnvironmentResult result = eb.createEnvironment(request);
 
-        return getEnvironment(result.getEnvironmentId());
+        String environmentId = result.getEnvironmentId();
+
+        waitForEnvironmentToBeReady(environmentName, applicationName, versionLabel);
+        return getEnvironment(environmentId);
     }
 
     public EnvironmentDescription updateEnvironment(String environmentName, String versionLabel) {

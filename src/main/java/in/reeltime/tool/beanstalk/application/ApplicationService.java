@@ -42,4 +42,16 @@ public class ApplicationService {
         CreateApplicationResult result = eb.createApplication(request);
         return result.getApplication();
     }
+
+    public void deleteApplication(String applicationName) {
+        if (!applicationExists(applicationName)) {
+            Logger.info("Application [%s] does not exist", applicationName);
+            return;
+        }
+
+        Logger.info("Deleting application [%s]", applicationName);
+
+        DeleteApplicationRequest request = new DeleteApplicationRequest(applicationName);
+        eb.deleteApplication(request);
+    }
 }
