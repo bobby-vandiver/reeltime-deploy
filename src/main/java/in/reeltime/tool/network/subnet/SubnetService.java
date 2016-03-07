@@ -82,4 +82,17 @@ public class SubnetService {
 
         return result.getSubnet();
     }
+
+    public void deleteSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
+        if (!subnetExists(vpc, availabilityZone, cidrBlock)) {
+            Logger.info("Subnet for cidr block [%s] does not exist", cidrBlock);
+            return;
+        }
+
+        String subnetId = getSubnet(vpc, availabilityZone, cidrBlock).getSubnetId();
+        Logger.info("Deleting subnet [%s]", subnetId);
+
+        DeleteSubnetRequest request = new DeleteSubnetRequest(subnetId);
+        ec2.deleteSubnet(request);
+    }
 }

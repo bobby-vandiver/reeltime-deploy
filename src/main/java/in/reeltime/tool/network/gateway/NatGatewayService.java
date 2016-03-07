@@ -56,8 +56,7 @@ public class NatGatewayService {
             return getNatGateway(subnet);
         }
 
-        String vpcId = subnet.getVpcId();
-        String allocationId = allocateElasticIpAddress(vpcId);
+        String allocationId = allocateElasticIpAddress();
 
         CreateNatGatewayRequest request = new CreateNatGatewayRequest()
                 .withAllocationId(allocationId)
@@ -69,7 +68,34 @@ public class NatGatewayService {
         return result.getNatGateway();
     }
 
-    private String allocateElasticIpAddress(String vpcId) {
+    public void removeNatGateway(Subnet subnet) {
+        String subnetId = subnet.getSubnetId();
+
+        if (!natGatewayExists(subnet)) {
+            Logger.info("NAT gateway does not exist for subnet [%s]", subnetId);
+            return;
+        }
+
+        NatGateway natGateway = getNatGateway(subnet);
+
+        String natGatewayId = natGateway.getNatGatewayId();
+        Logger.info("Deleting NAT gateway [%s]", natGatewayId);
+
+        DeleteNatGatewayRequest request = new DeleteNatGatewayRequest()
+                .withNatGatewayId(natGatewayId);
+
+        ec2.deleteNatGateway(request);
+
+        Logger.info("Releasing addresses associated with NAT gateway [%s]", natGatewayId);
+
+        for (NatGatewayAddress natGatewayAddress : natGateway.getNatGatewayAddresses()) {
+            String publicIp = natGatewayAddress.getPublicIp();
+            String allocationId = natGatewayAddress.getAllocationId();
+            releaseElasticIpAddress(publicIp, allocationId);
+        }
+    }
+
+    private String allocateElasticIpAddress() {
         AllocateAddressRequest request = new AllocateAddressRequest()
                 .withDomain(DomainType.Vpc);
 
@@ -80,5 +106,14 @@ public class NatGatewayService {
 
         Logger.info("Allocated elastic ip address with id [%s] and public ip address [%s]", allocationId, ipAddress);
         return allocationId;
+    }
+
+    private void releaseElasticIpAddress(String publicIp, String allocationId) {
+        ReleaseAddressRequest request = new ReleaseAddressRequest()
+                .withAllocationId(allocationId)
+                .withPublicIp(publicIp);
+
+        Logger.info("Releasing elastic ip address with id [%s] and public ip address [%s]", allocationId, publicIp);
+        ec2.releaseAddress(request);
     }
 }

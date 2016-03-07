@@ -57,13 +57,23 @@ public class RouteService {
         return result.getRouteTable();
     }
 
-    public boolean routeTableAssociatedWithSubnet(RouteTable routeTable, Subnet subnet) {
-        String subnetId = subnet.getSubnetId();
+    public void deleteRouteTable(Vpc vpc, String nameTag) {
+        if (!routeTableExists(vpc, nameTag)) {
+            Logger.info("Route table with name [%s] does not exist", nameTag);
+            return;
+        }
 
-        return routeTable.getAssociations().stream()
-                .filter(a -> a.getSubnetId().equals(subnetId))
-                .findFirst()
-                .isPresent();
+        String routeTableId = getRouteTable(vpc, nameTag).getRouteTableId();
+        Logger.info("Deleting route table [%s]", routeTableId);
+
+        DeleteRouteTableRequest request = new DeleteRouteTableRequest()
+                .withRouteTableId(routeTableId);
+
+        ec2.deleteRouteTable(request);
+    }
+
+    public boolean routeTableAssociatedWithSubnet(RouteTable routeTable, Subnet subnet) {
+        return getRouteTableAssociation(routeTable, subnet) != null;
     }
 
     public void associateRouteTableWithSubnet(RouteTable routeTable, Subnet subnet) {
@@ -72,6 +82,7 @@ public class RouteService {
 
         if (routeTableAssociatedWithSubnet(routeTable, subnet)) {
             Logger.info("Route table [%s] already associated with subnet [%s]", routeTableId, subnetId);
+            return;
         }
 
         AssociateRouteTableRequest request = new AssociateRouteTableRequest()
@@ -80,6 +91,43 @@ public class RouteService {
 
         Logger.info("Associating route table [%s] with subnet [%s]", routeTableId, subnetId);
         ec2.associateRouteTable(request);
+    }
+
+    public void disassociateRouteTableWithSubnet(RouteTable routeTable, Subnet subnet) {
+        String routeTableId = routeTable.getRouteTableId();
+        String subnetId = subnet.getSubnetId();
+
+        if (!routeTableAssociatedWithSubnet(routeTable, subnet)) {
+            Logger.info("Route table [%s] is not associated with subnet [%s]", routeTableId, subnetId);
+            return;
+        }
+
+        RouteTableAssociation association = getRouteTableAssociation(routeTable, subnet);
+
+        if (association == null) {
+            String message = "Association for route table [%s] with subnet [%s] has disappeared!";
+            throw new IllegalStateException(message);
+        }
+
+        String associationId = association.getRouteTableAssociationId();
+
+        Logger.info("Disassociating route table [%s] with subnet [%s] for association [%s]",
+                routeTableId, subnetId, associationId);
+
+        DisassociateRouteTableRequest request = new DisassociateRouteTableRequest()
+                .withAssociationId(associationId);
+
+        ec2.disassociateRouteTable(request);
+    }
+
+    private RouteTableAssociation getRouteTableAssociation(RouteTable routeTable, Subnet subnet) {
+        String subnetId = subnet.getSubnetId();
+
+        Optional<RouteTableAssociation> association = routeTable.getAssociations().stream()
+                .filter(a -> a.getSubnetId().equals(subnetId))
+                .findFirst();
+
+        return association.isPresent() ? association.get() : null;
     }
 
     public boolean routeTableHasInternetGatewayRoute(RouteTable routeTable, String cidrBlock, String gatewayId) {

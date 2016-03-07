@@ -45,4 +45,16 @@ public class TopicService {
         CreateTopicResult result = sns.createTopic(topicName);
         return new Topic().withTopicArn(result.getTopicArn());
     }
+
+    public void deleteTopic(String topicName) {
+        if (!topicExists(topicName)) {
+            Logger.info("Topic [%s] does not exist", topicName);
+            return;
+        }
+
+        Logger.info("Deleting topic [%s]", topicName);
+
+        String topicArn = getTopic(topicName).getTopicArn();
+        sns.deleteTopic(topicArn);
+    }
 }

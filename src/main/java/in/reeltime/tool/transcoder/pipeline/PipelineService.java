@@ -62,4 +62,18 @@ public class PipelineService {
         CreatePipelineResult result = ets.createPipeline(request);
         return result.getPipeline();
     }
+
+    public void deletePipeline(String pipelineName) {
+        if (!pipelineExists(pipelineName)) {
+            Logger.info("Pipeline [%s] does not exist", pipelineName);
+            return;
+        }
+
+        String pipelineId = getPipeline(pipelineName).getId();
+        DeletePipelineRequest request = new DeletePipelineRequest()
+                .withId(pipelineId);
+
+        Logger.info("Deleting pipeline [%s]", pipelineName);
+        ets.deletePipeline(request);
+    }
 }

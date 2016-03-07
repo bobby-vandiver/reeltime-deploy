@@ -55,6 +55,10 @@ public class ApplicationVersionService {
     }
 
     public void deleteApplicationVersion(String applicationName, String versionLabel) {
+        if (!applicationVersionExists(applicationName, versionLabel)) {
+            Logger.info("Application [%s] -- version [%s] does not exist", applicationName, versionLabel);
+            return;
+        }
         ApplicationVersionDescription applicationVersion = getApplicationVersion(applicationName, versionLabel);
         try {
             DeleteApplicationVersionRequest request = new DeleteApplicationVersionRequest()

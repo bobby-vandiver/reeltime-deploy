@@ -3,12 +3,15 @@ package in.reeltime.tool.network.security;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import com.google.common.collect.Lists;
+import groovy.util.logging.Log;
 import in.reeltime.tool.log.Logger;
 
 import java.util.Collection;
 import java.util.List;
 
 public class SecurityGroupService {
+
+    private static final String AMAZON_SERVICES_SECURITY_GROUP_PREFIX = "amazon-services-";
 
     private static final String DESCRIPTION_FORMAT = "SecurityGroup: %s";
 
@@ -67,7 +70,7 @@ public class SecurityGroupService {
 
     public SecurityGroup createSecurityGroup(Vpc vpc, String groupName) {
         if (securityGroupExists(vpc, groupName)) {
-            Logger.info("Security group %s already exists", groupName);
+            Logger.info("Security group [%s] already exists", groupName);
             return getSecurityGroup(vpc, groupName);
         }
 
@@ -115,7 +118,7 @@ public class SecurityGroupService {
                 addressesRemaining = 0;
             }
 
-            SecurityGroup securityGroup = createSecurityGroup(vpc, "amazon-services-" + groupNumber);
+            SecurityGroup securityGroup = createSecurityGroup(vpc, AMAZON_SERVICES_SECURITY_GROUP_PREFIX + groupNumber);
             securityGroup = addIngressRule(securityGroup, ipAddresses, "tcp", 80);
 
             securityGroups.add(securityGroup);
@@ -123,6 +126,33 @@ public class SecurityGroupService {
         }
 
         return securityGroups;
+    }
+
+    public void deleteSecurityGroup(Vpc vpc, String groupName) {
+        if (!securityGroupExists(vpc, groupName)) {
+            Logger.info("Security group [%s] does not exist", groupName);
+            return;
+        }
+
+        String groupId = getSecurityGroup(vpc, groupName).getGroupId();
+        Logger.info("Deleting security group [%s] with id [%s]", groupName, groupId);
+
+        DeleteSecurityGroupRequest request = new DeleteSecurityGroupRequest()
+                .withGroupId(groupId);
+
+        ec2.deleteSecurityGroup(request);
+    }
+
+    public void deleteSecurityGroupsForAmazonServices(Vpc vpc) {
+        List<SecurityGroup> securityGroups = getSecurityGroups(vpc);
+
+        for (SecurityGroup securityGroup : securityGroups) {
+            String groupName = securityGroup.getGroupName();
+
+            if (groupName.startsWith(AMAZON_SERVICES_SECURITY_GROUP_PREFIX)) {
+                deleteSecurityGroup(vpc, groupName);
+            }
+        }
     }
 
     public boolean securityGroupHasIngressRule(SecurityGroup securityGroup, IpPermission permission) {
@@ -211,6 +241,18 @@ public class SecurityGroupService {
 
         ec2.revokeSecurityGroupEgress(request);
         return refreshSecurityGroup(securityGroup);
+    }
+
+    private List<SecurityGroup> getSecurityGroups(Vpc vpc) {
+        Filter vpcIdFilter = new Filter()
+                .withName("vpc-id")
+                .withValues(vpc.getVpcId());
+
+        DescribeSecurityGroupsRequest request = new DescribeSecurityGroupsRequest()
+                .withFilters(vpcIdFilter);
+
+        DescribeSecurityGroupsResult result = ec2.describeSecurityGroups(request);
+        return result.getSecurityGroups();
     }
 
     private SecurityGroup refreshSecurityGroup(SecurityGroup securityGroup) {

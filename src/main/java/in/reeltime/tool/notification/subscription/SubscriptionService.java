@@ -42,4 +42,17 @@ public class SubscriptionService {
         Logger.info("Subscribing endpoint [%s] to topic [%s]", endpoint, topicArn);
         sns.subscribe(topicArn, protocol, endpoint);
     }
+
+    public void unsubscribe(Topic topic) {
+        String topicArn = topic.getTopicArn();
+
+        ListSubscriptionsByTopicResult result = sns.listSubscriptionsByTopic(topicArn);
+
+        for (Subscription subscription : result.getSubscriptions()) {
+            String subscriptionArn = subscription.getSubscriptionArn();
+
+            Logger.info("Unsubscribing [%s] for topic [%s]", subscriptionArn, topicArn);
+            sns.unsubscribe(subscriptionArn);
+        }
+    }
 }

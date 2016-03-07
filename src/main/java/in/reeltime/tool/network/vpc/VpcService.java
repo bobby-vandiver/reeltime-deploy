@@ -42,4 +42,12 @@ public class VpcService {
         CreateVpcResult result = ec2.createVpc(request);
         return result.getVpc();
     }
+
+    public void deleteVpc(Vpc vpc) {
+        String vpcId = vpc.getVpcId();
+        Logger.info("Deleting vpc [%s]", vpcId);
+
+        DeleteVpcRequest request = new DeleteVpcRequest(vpcId);
+        ec2.deleteVpc(request);
+    }
 }

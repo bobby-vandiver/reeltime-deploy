@@ -49,19 +49,52 @@ public class InternetGatewayService {
     }
 
     public InternetGateway addInternetGateway(Vpc vpc) {
+        String vpcId = vpc.getVpcId();
+
         if (internetGatewayExists(vpc)) {
-            Logger.info("Internet gateway for vpc [%s] already exists", vpc.getVpcId());
+            Logger.info("Internet gateway for vpc [%s] already exists", vpcId);
             return getInternetGateway(vpc);
         }
+
+        Logger.info("Creating internet gateway for vpc [%s]", vpcId);
         InternetGateway internetGateway = createInternetGateway();
+
+        String internetGatewayId = internetGateway.getInternetGatewayId();
+
+        Logger.info("Attaching internet gateway [%s] for vpc [%s]", internetGatewayId, vpcId);
         attachGatewayToVpc(internetGateway, vpc);
+
         return internetGateway;
+    }
+
+    public void removeInternetGateway(Vpc vpc) {
+        String vpcId = vpc.getVpcId();
+
+        if (!internetGatewayExists(vpc)) {
+            Logger.info("Internet gateway does not exist for vpc [%s]", vpcId);
+            return;
+        }
+
+        InternetGateway internetGateway = getInternetGateway(vpc);
+        String internetGatewayId = internetGateway.getInternetGatewayId();
+
+        Logger.info("Detaching internet gateway [%s] for vpc [%s]", internetGatewayId, vpcId);
+        detachGatewayFromVpc(internetGateway, vpc);
+
+        Logger.info("Deleting internet gateway [%s] for vpc [%s]", internetGatewayId, vpcId);
+        deleteInternetGateway(internetGateway);
     }
 
     private InternetGateway createInternetGateway() {
         CreateInternetGatewayRequest request = new CreateInternetGatewayRequest();
         CreateInternetGatewayResult result = ec2.createInternetGateway(request);
         return result.getInternetGateway();
+    }
+
+    private void deleteInternetGateway(InternetGateway internetGateway) {
+        DeleteInternetGatewayRequest request = new DeleteInternetGatewayRequest()
+                .withInternetGatewayId(internetGateway.getInternetGatewayId());
+        ec2.deleteInternetGateway(request);
     }
 
     private void attachGatewayToVpc(InternetGateway internetGateway, Vpc vpc) {
@@ -73,5 +106,16 @@ public class InternetGatewayService {
                 .withVpcId(vpcId);
 
         ec2.attachInternetGateway(request);
+    }
+
+    private void detachGatewayFromVpc(InternetGateway internetGateway, Vpc vpc) {
+        String internetGatewayId = internetGateway.getInternetGatewayId();
+        String vpcId = vpc.getVpcId();
+
+        DetachInternetGatewayRequest request = new DetachInternetGatewayRequest()
+                .withInternetGatewayId(internetGatewayId)
+                .withVpcId(vpcId);
+
+        ec2.detachInternetGateway(request);
     }
 }
