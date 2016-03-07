@@ -17,6 +17,7 @@ public class Application {
     private static final String APPLICATION_VERSION_OPT = "application-version";
     private static final String WAR_PATH_OPT = "war";
     private static final String PRODUCTION_FLAG_OPT = "production";
+    private static final String REMOVE_RESOURCES_FLAG_OPT = "remote-resources";
 
     private static final List<String> REQUIRED_OPTS = new ImmutableList.Builder<String>()
             .add(ACCOUNT_ID_OPT)
@@ -46,15 +47,19 @@ public class Application {
             String applicationVersion = line.getOptionValue(APPLICATION_VERSION_OPT);
 
             String warPath = line.getOptionValue(WAR_PATH_OPT);
+
             String productionFlag = line.getOptionValue(PRODUCTION_FLAG_OPT);
+            String removeResourcesFlag = line.getOptionValue(REMOVE_RESOURCES_FLAG_OPT);
 
             File war = new File(warPath);
+
             boolean production = Boolean.parseBoolean(productionFlag);
+            boolean removeResources = Boolean.parseBoolean(removeResourcesFlag);
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
             DeploymentService deploymentService = serviceFactory.deploymentService();
-            deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war, production);
+            deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war, production, removeResources);
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
@@ -85,6 +90,9 @@ public class Application {
 
         Option production = option(PRODUCTION_FLAG_OPT, false, "Flag to enable additional configuration for production environment.");
         options.addOption(production);
+
+        Option removeExistingResources = option(REMOVE_RESOURCES_FLAG_OPT, false, "Flag to force removal of existing resources.");
+        options.addOption(removeExistingResources);
 
         return options;
     }

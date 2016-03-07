@@ -42,7 +42,7 @@ public class DeploymentService {
     }
 
     public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
-                       File war, boolean production) throws FileNotFoundException {
+                       File war, boolean production, boolean removeResources) throws FileNotFoundException {
         Network network = networkService.setupNetwork();
         Database database = databaseService.setupDatabase(network);
 
