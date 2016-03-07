@@ -28,8 +28,20 @@ public class StorageService {
                 .build();
     }
 
+    public void tearDownStorage() {
+        deleteBucket("master-videos");
+        deleteBucket("thumbnails");
+        deleteBucket("playlists-and-segments");
+        deleteBucket("wars");
+    }
+
     private Bucket createBucket(String nameSuffix) {
         String name = nameService.getNameForResource(Bucket.class, nameSuffix);
         return bucketService.createBucket(name);
+    }
+
+    private void deleteBucket(String nameSuffix) {
+        String name = nameService.getNameForResource(Bucket.class, nameSuffix);
+        bucketService.deleteBucket(name);
     }
 }

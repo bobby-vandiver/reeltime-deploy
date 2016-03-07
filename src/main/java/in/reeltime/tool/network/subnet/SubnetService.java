@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
 import in.reeltime.tool.log.Logger;
 
+import java.util.Iterator;
 import java.util.List;
 
 public class SubnetService {
@@ -24,6 +25,30 @@ public class SubnetService {
         return !getSubnets(vpc, availabilityZone, cidrBlock).isEmpty();
     }
 
+    public boolean subnetExists(Vpc vpc, String nameTag) {
+        return getSubnet(vpc, nameTag) != null;
+    }
+
+    public Subnet getSubnet(Vpc vpc, String nameTag) {
+        Subnet subnet = null;
+
+        Iterator<Subnet> iterator = getSubnets(vpc).iterator();
+
+        while (iterator.hasNext() && subnet == null) {
+            Subnet candidate = iterator.next();
+
+            boolean hasNameTag = candidate.getTags()
+                    .stream()
+                    .filter(t -> t.getKey().equals("Name") && t.getValue().equals(nameTag))
+                    .findFirst()
+                    .isPresent();
+
+            subnet = hasNameTag ? candidate : null;
+        }
+
+        return null;
+    }
+
     public Subnet getSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
         List<Subnet> subnets = getSubnets(vpc, availabilityZone, cidrBlock);
         String vpcId = vpc.getVpcId();
@@ -41,12 +66,7 @@ public class SubnetService {
     }
 
     private List<Subnet> getSubnets(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
-        String vpcId = vpc.getVpcId();
         String zoneName = availabilityZone.getZoneName();
-
-        Filter vpcFilter = new Filter()
-                .withName("vpc-id")
-                .withValues(vpcId);
 
         Filter availabilityZoneFilter = new Filter()
                 .withName("availabilityZone")
@@ -56,8 +76,19 @@ public class SubnetService {
                 .withName("cidrBlock")
                 .withValues(cidrBlock);
 
+        return getSubnets(vpc, availabilityZoneFilter, cidrBlockFilter);
+    }
+
+    private List<Subnet> getSubnets(Vpc vpc, Filter...filters) {
+        String vpcId = vpc.getVpcId();
+
+        Filter vpcFilter = new Filter()
+                .withName("vpc-id")
+                .withValues(vpcId);
+
         DescribeSubnetsRequest request = new DescribeSubnetsRequest()
-                .withFilters(vpcFilter, availabilityZoneFilter, cidrBlockFilter);
+                .withFilters(vpcFilter)
+                .withFilters(filters);
 
         DescribeSubnetsResult result = ec2.describeSubnets(request);
         return result.getSubnets();
@@ -83,13 +114,13 @@ public class SubnetService {
         return result.getSubnet();
     }
 
-    public void deleteSubnet(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock) {
-        if (!subnetExists(vpc, availabilityZone, cidrBlock)) {
-            Logger.info("Subnet for cidr block [%s] does not exist", cidrBlock);
+    public void deleteSubnet(Vpc vpc, String nameTag) {
+        if (!subnetExists(vpc, nameTag)) {
+            Logger.info("Subnet [%s] does not exist", nameTag);
             return;
         }
 
-        String subnetId = getSubnet(vpc, availabilityZone, cidrBlock).getSubnetId();
+        String subnetId = getSubnet(vpc, nameTag).getSubnetId();
         Logger.info("Deleting subnet [%s]", subnetId);
 
         DeleteSubnetRequest request = new DeleteSubnetRequest(subnetId);

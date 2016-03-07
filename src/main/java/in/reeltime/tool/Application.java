@@ -1,7 +1,6 @@
 package in.reeltime.tool;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.primitives.Booleans;
 import in.reeltime.tool.deployment.DeploymentService;
 import in.reeltime.tool.factory.ServiceFactory;
 import org.apache.commons.cli.*;
@@ -55,7 +54,7 @@ public class Application {
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
             DeploymentService deploymentService = serviceFactory.deploymentService();
-            deploymentService.create(accountId, environmentName, applicationName, applicationVersion, war, production);
+            deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war, production);
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();

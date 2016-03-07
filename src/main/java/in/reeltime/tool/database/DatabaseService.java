@@ -31,6 +31,14 @@ public class DatabaseService {
         return new Database(configuration, instance);
     }
 
+    public void tearDownDatabase() {
+        String groupName = nameService.getNameForResource(DBSubnetGroup.class);
+        String identifier = nameService.getNameForResource(DBInstance.class, "identifier");
+
+        databaseInstanceService.deleteInstance(identifier);
+        databaseSubnetGroupService.deleteSubnetGroup(groupName);
+    }
+
     private DatabaseConfiguration getConfiguration(Network network) {
         String groupName = nameService.getNameForResource(DBSubnetGroup.class);
         DBSubnetGroup subnetGroup = databaseSubnetGroupService.createSubnetGroup(groupName, network.getDatabaseSubnets());

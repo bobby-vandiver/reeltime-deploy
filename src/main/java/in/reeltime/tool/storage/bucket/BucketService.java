@@ -35,8 +35,13 @@ public class BucketService {
         return s3.createBucket(bucketName);
     }
 
-    public void removeBucket(String bucketName) {
-        Logger.info("Removing bucket [%s]", bucketName);
+    public void deleteBucket(String bucketName) {
+        if (!bucketExists(bucketName)) {
+            Logger.info("Bucket [%s] does not exist", bucketName);
+            return;
+        }
+
+        Logger.info("Deleting bucket [%s]", bucketName);
         s3.deleteBucket(bucketName);
     }
 }

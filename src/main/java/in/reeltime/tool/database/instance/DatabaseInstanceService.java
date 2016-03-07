@@ -89,9 +89,7 @@ public class DatabaseInstanceService {
         return rds.createDBInstance(request);
     }
 
-    public void deleteInstance(DatabaseConfiguration configuration) {
-        String instanceIdentifier = configuration.getDbInstanceIdentifier();
-
+    public void deleteInstance(String instanceIdentifier) {
         if (!instanceExists(instanceIdentifier)) {
             Logger.info("Database instance [%s] does not exist", instanceIdentifier);
             return;

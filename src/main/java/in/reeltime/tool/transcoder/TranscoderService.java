@@ -44,4 +44,12 @@ public class TranscoderService {
                 .withPipeline(pipeline)
                 .build();
     }
+
+    public void tearDownTranscoder() {
+        String pipelineName = nameService.getNameForResource(Pipeline.class);
+        pipelineService.deletePipeline(pipelineName);
+
+        String topicName = getTranscoderTopicName();
+        topicService.deleteTopic(topicName);
+    }
 }
