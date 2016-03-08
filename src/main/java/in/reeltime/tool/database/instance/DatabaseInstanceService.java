@@ -20,6 +20,11 @@ public class DatabaseInstanceService {
     private static final String WAITING_FOR_AVAILABLE_FAILED_FORMAT =
             "Database instance [%s] did not become available during the expected time";
 
+    private static final String WAITING_FOR_DELETION_STATUS_FORMAT =
+            "Waiting for database instance [%s] to be deleted";
+
+    private static final String WAITING_FOR_DELETION_FAILED_FORMAT =
+            "Database instance [%s] did not complete deletion during the expected time";
 
     private final AmazonRDS rds;
     private final ConditionalService conditionalService;
@@ -103,7 +108,9 @@ public class DatabaseInstanceService {
 
         Logger.info("Deleting database instance [%s]", instanceIdentifier);
 
-        DeleteDBInstanceRequest request = new DeleteDBInstanceRequest(instanceIdentifier);
+        DeleteDBInstanceRequest request = new DeleteDBInstanceRequest(instanceIdentifier)
+                .withSkipFinalSnapshot(true);
+
         rds.deleteDBInstance(request);
     }
 
@@ -117,6 +124,14 @@ public class DatabaseInstanceService {
                 () -> checkInstanceStatus(identifier, "available"));
 
         return refreshInstance(instance);
+    }
+
+    public void waitForInstanceToBeDeleted(String identifier) {
+        String statusMessage = String.format(WAITING_FOR_DELETION_STATUS_FORMAT, identifier);
+        String failureMessage = String.format(WAITING_FOR_DELETION_FAILED_FORMAT, identifier);
+
+        conditionalService.waitForCondition(statusMessage, failureMessage, WAITING_POLLING_INTERVAL_SECS,
+                () -> !instanceExists(identifier));
     }
 
     private boolean checkInstanceStatus(String identifier, String status) {

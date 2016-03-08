@@ -36,6 +36,7 @@ public class DatabaseService {
         String identifier = nameService.getNameForResource(DBInstance.class, "identifier");
 
         databaseInstanceService.deleteInstance(identifier);
+        databaseInstanceService.waitForInstanceToBeDeleted(identifier);
         databaseSubnetGroupService.deleteSubnetGroup(groupName);
     }
 
