@@ -33,8 +33,14 @@ public class DatabaseSubnetGroupService {
 
         Logger.info("Getting DB subnet group [%s]", groupName);
 
-        DescribeDBSubnetGroupsResult result = rds.describeDBSubnetGroups(request);
-        return result.getDBSubnetGroups();
+        try {
+            DescribeDBSubnetGroupsResult result = rds.describeDBSubnetGroups(request);
+            return result.getDBSubnetGroups();
+        }
+        catch (DBSubnetGroupNotFoundException e) {
+            Logger.info("Caught DBSubnetGroupNotFoundException for group [%s]", groupName);
+            return Lists.newArrayList();
+        }
     }
 
     public DBSubnetGroup createSubnetGroup(String groupName, List<Subnet> subnets) {

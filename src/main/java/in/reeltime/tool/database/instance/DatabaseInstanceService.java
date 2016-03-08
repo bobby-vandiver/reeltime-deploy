@@ -42,8 +42,14 @@ public class DatabaseInstanceService {
         DescribeDBInstancesRequest request = new DescribeDBInstancesRequest()
                 .withDBInstanceIdentifier(identifier);
 
-        DescribeDBInstancesResult result = rds.describeDBInstances(request);
-        return result.getDBInstances();
+        try {
+            DescribeDBInstancesResult result = rds.describeDBInstances(request);
+            return result.getDBInstances();
+        }
+        catch (DBInstanceNotFoundException e) {
+            Logger.info("Caught DBInstanceNotFoundException for identifier [%s]", identifier);
+            return Lists.newArrayList();
+        }
     }
 
     public DBInstance createInstance(DatabaseConfiguration configuration) {

@@ -44,6 +44,11 @@ public class DeploymentService {
 
     public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
                        File war, boolean production, boolean removeResources) throws FileNotFoundException {
+        if (!war.exists()) {
+            String message = String.format("War file [%s] not found", war.getName());
+            throw new FileNotFoundException(message);
+        }
+
         if (!production) {
             Logger.info("Tearing down transcoder and database so they are recreated");
             transcoderService.tearDownTranscoder();

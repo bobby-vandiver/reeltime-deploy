@@ -46,6 +46,10 @@ public class DatabaseService {
         String identifier = nameService.getNameForResource(DBInstance.class, "identifier");
         String databaseName = nameService.getNameForResource(Database.class);
 
+        // DBName must begin with a letter and contain only alphanumeric characters.
+        // TODO: Add more validation for database name
+        databaseName = databaseName.replaceAll("[^A-Za-z0-9]", "");
+
         SecurityGroup securityGroup = network.getDatabaseSecurityGroup();
 
         return new DatabaseConfiguration.Builder()

@@ -27,7 +27,7 @@ public class ApplicationService {
         DescribeApplicationsResult result = eb.describeApplications(request);
 
         List<ApplicationDescription> applications = result.getApplications();
-        return !applicationName.isEmpty() ? applications.get(0) : null;
+        return !applications.isEmpty() ? applications.get(0) : null;
     }
 
     public ApplicationDescription createApplication(String applicationName) {
