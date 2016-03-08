@@ -6,6 +6,7 @@ import in.reeltime.tool.access.role.RolePolicyParameters;
 import in.reeltime.tool.beanstalk.BeanstalkService;
 import in.reeltime.tool.database.Database;
 import in.reeltime.tool.database.DatabaseService;
+import in.reeltime.tool.log.Logger;
 import in.reeltime.tool.network.Network;
 import in.reeltime.tool.network.NetworkService;
 import in.reeltime.tool.storage.Storage;
@@ -43,6 +44,12 @@ public class DeploymentService {
 
     public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
                        File war, boolean production, boolean removeResources) throws FileNotFoundException {
+        if (!production) {
+            Logger.info("Tearing down transcoder and database so they are recreated");
+            transcoderService.tearDownTranscoder();
+            databaseService.tearDownDatabase();
+        }
+
         Network network = networkService.setupNetwork();
         Database database = databaseService.setupDatabase(network);
 
@@ -73,10 +80,5 @@ public class DeploymentService {
                 .build();
 
         beanstalkService.deploy(configuration);
-    }
-
-    public void delete() {
-        transcoderService.tearDownTranscoder();
-        databaseService.tearDownDatabase();
     }
 }
