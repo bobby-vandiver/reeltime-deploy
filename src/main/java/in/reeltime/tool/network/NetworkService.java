@@ -82,8 +82,6 @@ public class NetworkService {
         databaseSecurityGroup = securityGroupService.addIngressRule(databaseSecurityGroup, applicationSecurityGroup, "tcp", 3306);
         databaseSecurityGroup = securityGroupService.revokeAllEgressRules(databaseSecurityGroup);
 
-        List<SecurityGroup> amazonServicesSecurityGroups = securityGroupService.createSecurityGroupsForAmazonServices(vpc);
-
         return new Network.Builder()
                 .withVpc(vpc)
                 .withApplicationSubnet(applicationSubnet)
@@ -93,7 +91,6 @@ public class NetworkService {
                 .withDatabaseSecurityGroup(databaseSecurityGroup)
                 .withLoadBalancerSubnet(publicSubnet)
                 .withLoadBalancerSecurityGroup(loadBalancerSecurityGroup)
-                .withAmazonServicesSecurityGroups(amazonServicesSecurityGroups)
                 .build();
     }
 
@@ -104,8 +101,6 @@ public class NetworkService {
             Logger.info("Vpc does not exist");
             return;
         }
-
-        securityGroupService.deleteSecurityGroupsForAmazonServices(vpc);
 
         deleteSecurityGroup(vpc, "database");
         deleteSecurityGroup(vpc, "application");

@@ -21,8 +21,6 @@ public class Network {
     private final List<Subnet> loadBalancerSubnets;
     private final SecurityGroup loadBalancerSecurityGroup;
 
-    private final List<SecurityGroup> amazonServicesSecurityGroups;
-
     private Network(Builder builder) {
         this.vpc = builder.vpc;
 
@@ -34,8 +32,6 @@ public class Network {
 
         this.loadBalancerSubnets = ImmutableList.copyOf(builder.loadBalancerSubnets);
         this.loadBalancerSecurityGroup = builder.loadBalancerSecurityGroup;
-
-        this.amazonServicesSecurityGroups = ImmutableList.copyOf(builder.amazonServicesSecurityGroups);
     }
 
     public Vpc getVpc() {
@@ -64,10 +60,6 @@ public class Network {
 
     public SecurityGroup getLoadBalancerSecurityGroup() {
         return loadBalancerSecurityGroup;
-    }
-
-    public List<SecurityGroup> getAmazonServicesSecurityGroups() {
-        return amazonServicesSecurityGroups;
     }
 
     public static class Builder {
@@ -122,11 +114,6 @@ public class Network {
 
         Builder withLoadBalancerSecurityGroup(SecurityGroup securityGroup) {
             loadBalancerSecurityGroup = securityGroup;
-            return this;
-        }
-
-        Builder withAmazonServicesSecurityGroups(List<SecurityGroup> securityGroups) {
-            this.amazonServicesSecurityGroups = securityGroups;
             return this;
         }
 
