@@ -40,7 +40,9 @@ public class AccessService {
         Role transcoderRole = createRole("transcoder", "elastictranscoder-assume-policy");
         transcoderRole = addPolicyToRole(transcoderRole, "transcode-videos", "transcode-videos-policy", rolePolicyParameters);
 
-        CertificateDetail certificate = certificateService.getCertificate("*.bobbyvandiver.com");
+        // TODO: Determine the domain name of the certificate dynamically
+        String certificateDomainName = "*.bobbyvandiver.com";
+        CertificateDetail certificate = certificateService.getCertificate(certificateDomainName);
 
         return new Access(ec2InstanceRole, transcoderRole, ec2InstanceProfile, certificate);
     }
