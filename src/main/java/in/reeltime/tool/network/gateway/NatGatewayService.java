@@ -2,16 +2,21 @@ package in.reeltime.tool.network.gateway;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
+import in.reeltime.tool.condition.ConditionalService;
 import in.reeltime.tool.log.Logger;
 
 import java.util.List;
 
 public class NatGatewayService {
 
-    private final AmazonEC2 ec2;
+    private static final long WAIT_FOR_AVAILABLE_POLLING_IN_SECS = 10;
 
-    public NatGatewayService(AmazonEC2 ec2) {
+    private final AmazonEC2 ec2;
+    private final ConditionalService conditionalService;
+
+    public NatGatewayService(AmazonEC2 ec2, ConditionalService conditionalService) {
         this.ec2 = ec2;
+        this.conditionalService = conditionalService;
     }
 
     public boolean natGatewayExists(Subnet subnet) {
@@ -48,6 +53,20 @@ public class NatGatewayService {
         return result.getNatGateways();
     }
 
+    private NatGateway getNatGateway(String natGatewayId) {
+        Filter natGatewayIdFilter = new Filter()
+                .withName("nat-gateway-id")
+                .withValues(natGatewayId);
+
+        DescribeNatGatewaysRequest request = new DescribeNatGatewaysRequest()
+                .withFilter(natGatewayIdFilter);
+
+        DescribeNatGatewaysResult result = ec2.describeNatGateways(request);
+        List<NatGateway> natGateways = result.getNatGateways();
+
+        return !natGateways.isEmpty() ? natGateways.get(0) : null;
+    }
+
     public NatGateway addNatGateway(Subnet subnet) {
         String subnetId = subnet.getSubnetId();
 
@@ -65,7 +84,23 @@ public class NatGatewayService {
         Logger.info("Creating NAT gateway in subnet [%s] with allocation id [%s]", subnetId, allocationId);
 
         CreateNatGatewayResult result = ec2.createNatGateway(request);
-        return result.getNatGateway();
+        NatGateway natGateway = result.getNatGateway();
+
+        return waitForNatGatewayToBecomeAvailable(natGateway);
+    }
+
+    private NatGateway waitForNatGatewayToBecomeAvailable(NatGateway natGateway) {
+        String natGatewayId = natGateway.getNatGatewayId();
+
+        String statusMessage = String.format("Waiting for NAT gateway [%s] to become available", natGatewayId);
+        String failureMessage = "Exceeded max retries for polling NAT gateway state. Check AWS console for more info.";
+
+        conditionalService.waitForCondition(statusMessage, failureMessage, WAIT_FOR_AVAILABLE_POLLING_IN_SECS, () -> {
+            NatGateway gateway = getNatGateway(natGatewayId);
+            return gateway != null && gateway.getState().equals("available");
+        });
+
+        return getNatGateway(natGatewayId);
     }
 
     public void removeNatGateway(Subnet subnet) {

@@ -69,8 +69,13 @@ public class BeanstalkService {
         }
 
         if (objectService.objectExists(warBucketName, warObjectKey)) {
-            String message = String.format("Object with key [%s] in bucket [%s] already exists!", warObjectKey, warBucketName);
-            throw new IllegalStateException(message);
+            if (production) {
+                String message = String.format("Object with key [%s] in bucket [%s] already exists!", warObjectKey, warBucketName);
+                throw new IllegalStateException(message);
+            }
+            else {
+                objectService.deleteObject(warBucketName, warObjectKey);
+            }
         }
 
         objectService.createObject(war, warsBucket, warObjectKey);

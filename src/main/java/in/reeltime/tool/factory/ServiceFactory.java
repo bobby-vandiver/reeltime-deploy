@@ -65,8 +65,10 @@ public class ServiceFactory {
         SubnetService subnetService = new SubnetService(ec2);
         RouteService routeService = new RouteService(ec2);
 
+        ConditionalService conditionalService = new ConditionalService();
+
         InternetGatewayService internetGatewayService = new InternetGatewayService(ec2);
-        NatGatewayService natGatewayService = new NatGatewayService(ec2);
+        NatGatewayService natGatewayService = new NatGatewayService(ec2, conditionalService);
 
         IpAddressService ipAddressService = new IpAddressService();
         SecurityGroupService securityGroupService = new SecurityGroupService(ec2, ipAddressService);
