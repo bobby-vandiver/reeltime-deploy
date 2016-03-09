@@ -14,10 +14,13 @@ import in.reeltime.tool.storage.object.ObjectService;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 
 public class BeanstalkService {
 
     private static final String PROTOCOL = "https";
+    private static final String ENDPOINT_URL_FILENAME = "endpoint-url.txt";
 
     private final EnvironmentService environmentService;
 
@@ -98,9 +101,23 @@ public class BeanstalkService {
         Logger.info("Successfully deployed war [%s]", war.getName());
         Logger.info("Endpoint URL [%s]", environment.getEndpointURL());
         Logger.info("CNAME [%s]", environment.getCNAME());
+
+        Logger.info("Writing endpoint URL out to file");
+        writeEndpointUrl(environment.getEndpointURL());
     }
 
     private String getEndpoint(EnvironmentDescription environment, String protocol) {
         return protocol + "://" + environment.getCNAME() + "/aws/transcoder/notification";
+    }
+
+    private void writeEndpointUrl(String endpointUrl) throws FileNotFoundException {
+        try {
+            PrintWriter writer = new PrintWriter(ENDPOINT_URL_FILENAME, "UTF-8");
+            writer.println(endpointUrl);
+            writer.close();
+        }
+        catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("UTF-8 not supported", e);
+        }
     }
 }
