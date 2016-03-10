@@ -73,7 +73,7 @@ public class EnvironmentService {
 
     public EnvironmentDescription createEnvironment(String environmentName, String applicationName, String versionLabel,
                                                     BeanstalkConfiguration beanstalkConfiguration) {
-        String solutionStack = "64bit Amazon Linux 2015.03 v1.3.1 running Tomcat 8 Java 8";
+        String solutionStack = "64bit Amazon Linux 2015.09 v2.0.8 running Tomcat 8 Java 8";
 
         // The application server will always be a web server
         EnvironmentTier tier = new EnvironmentTier()
