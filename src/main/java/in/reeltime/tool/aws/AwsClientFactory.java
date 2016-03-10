@@ -1,7 +1,9 @@
 package in.reeltime.tool.aws;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.retry.RetryPolicy;
 import com.amazonaws.services.certificatemanager.AWSCertificateManager;
 import com.amazonaws.services.certificatemanager.AWSCertificateManagerClient;
 import com.amazonaws.services.ec2.AmazonEC2;
@@ -22,6 +24,8 @@ import in.reeltime.tool.util.SystemPropertyUtil;
 
 public class AwsClientFactory {
 
+    private static final int MAX_ERROR_RETRY = 10;
+
     private final AWSCredentials credentials;
 
     public AwsClientFactory() {
@@ -33,35 +37,44 @@ public class AwsClientFactory {
     }
 
     public AWSCertificateManager acm() {
-        return new AWSCertificateManagerClient(credentials);
+        return new AWSCertificateManagerClient(credentials, clientConfiguration());
     }
 
     public AWSElasticBeanstalk eb() {
-        return new AWSElasticBeanstalkClient(credentials);
+        return new AWSElasticBeanstalkClient(credentials, clientConfiguration());
     }
 
     public AmazonEC2 ec2() {
-        return new AmazonEC2Client(credentials);
+        return new AmazonEC2Client(credentials, clientConfiguration());
     }
 
     public AmazonElasticTranscoder ets() {
-        return new AmazonElasticTranscoderClient(credentials);
+        return new AmazonElasticTranscoderClient(credentials, clientConfiguration());
     }
 
     public AmazonIdentityManagement iam() {
-        return new AmazonIdentityManagementClient(credentials);
+        return new AmazonIdentityManagementClient(credentials, clientConfiguration());
     }
 
     public AmazonRDS rds() {
-        return new AmazonRDSClient(credentials);
+        return new AmazonRDSClient(credentials, clientConfiguration());
     }
 
     public AmazonS3 s3() {
-        return new AmazonS3Client(credentials);
+        return new AmazonS3Client(credentials, clientConfiguration());
     }
 
     public AmazonSNS sns() {
-        return new AmazonSNSClient(credentials);
+        return new AmazonSNSClient(credentials, clientConfiguration());
+    }
+
+    private ClientConfiguration clientConfiguration() {
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+
+        clientConfiguration.setMaxErrorRetry(MAX_ERROR_RETRY);
+        clientConfiguration.setRetryPolicy(new RetryPolicy(null, null, MAX_ERROR_RETRY, true));
+
+        return clientConfiguration;
     }
 
     private static AWSCredentials loadCredentials() {
