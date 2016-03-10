@@ -34,7 +34,7 @@ public class EnvironmentService {
     }
 
     public boolean environmentExists(String environmentName, String applicationName, String versionLabel) {
-        EnvironmentDescription environment = getEnvironment(environmentName, applicationName, versionLabel);
+        EnvironmentDescription environment = getEnvironment(environmentName, applicationName, versionLabel, false);
         return environment != null && !environment.getStatus().equals(TERMINATED);
     }
 
@@ -48,12 +48,18 @@ public class EnvironmentService {
     }
 
     public EnvironmentDescription getEnvironment(String environmentName, String applicationName, String versionLabel) {
+        return getEnvironment(environmentName, applicationName, versionLabel, true);
+    }
+
+    private EnvironmentDescription getEnvironment(String environmentName, String applicationName, String versionLabel, boolean log) {
         DescribeEnvironmentsRequest request = new DescribeEnvironmentsRequest()
                 .withApplicationName(applicationName)
                 .withEnvironmentNames(environmentName)
                 .withVersionLabel(versionLabel);
 
-        Logger.info("Getting environment [%s] for application [%s] -- version [%s]", environmentName, applicationName, versionLabel);
+        if (log) {
+            Logger.info("Getting environment [%s] for application [%s] -- version [%s]", environmentName, applicationName, versionLabel);
+        }
         return getEnvironment(request);
     }
 
@@ -138,7 +144,7 @@ public class EnvironmentService {
     }
 
     private boolean environmentIsReady(String environmentName, String applicationName, String versionLabel) {
-        EnvironmentDescription environment = getEnvironment(environmentName, applicationName, versionLabel);
+        EnvironmentDescription environment = getEnvironment(environmentName, applicationName, versionLabel, false);
         return environment != null && environment.getStatus().equals(READY);
     }
 
