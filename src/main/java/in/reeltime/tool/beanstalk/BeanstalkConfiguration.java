@@ -11,6 +11,7 @@ import in.reeltime.tool.storage.Storage;
 import in.reeltime.tool.transcoder.Transcoder;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -117,19 +118,22 @@ public class BeanstalkConfiguration {
 
 
     private String csv(Collection collection, Function<Object, String> function) {
-        List<String> list = Lists.newArrayList();
+        StringBuilder builder = new StringBuilder();
 
-        for (Object obj : collection) {
-            try {
-                String value = function.apply(obj);
-                list.add(value);
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
+        Iterator iterator = collection.iterator();
+
+        while (iterator.hasNext()) {
+            Object obj = iterator.next();
+
+            String value = function.apply(obj);
+            builder.append(value);
+
+            if (iterator.hasNext()) {
+                builder.append(",");
             }
         }
 
-        return StringUtils.join(",", (String[]) list.toArray());
+        return builder.toString();
     }
 
     public static class VpcConfiguration {
