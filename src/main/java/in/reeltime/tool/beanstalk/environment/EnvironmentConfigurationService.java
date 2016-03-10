@@ -23,7 +23,7 @@ public class EnvironmentConfigurationService {
                 vpc("ELBSubnets", vpcConfiguration.getElasticLoadBalancerSubnets());
 
         ConfigurationOptionSetting associatePublicIpAddress =
-                vpc("AssociatePublicIpAddress", vpcConfiguration.getAutoScalingSubnets());
+                vpc("AssociatePublicIpAddress", vpcConfiguration.getAssociatePublicIpAddress());
 
         BeanstalkConfiguration.LoadBalancerConfiguration loadBalancerConfiguration =
                 beanstalkConfiguration.getLoadBalancerConfiguration();
