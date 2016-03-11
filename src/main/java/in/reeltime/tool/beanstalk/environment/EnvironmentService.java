@@ -103,7 +103,7 @@ public class EnvironmentService {
 
         String environmentId = result.getEnvironmentId();
 
-        waitForEnvironmentToBeReady(environmentName, applicationName, versionLabel);
+        waitForEnvironmentToBeReady(environmentId);
         return getEnvironment(environmentId);
     }
 
@@ -135,16 +135,16 @@ public class EnvironmentService {
         Logger.info("Successfully terminated environment");
     }
 
-    private void waitForEnvironmentToBeReady(String environmentName, String applicationName, String versionLabel) {
+    private void waitForEnvironmentToBeReady(String environmentId) {
         String statusMessage = "Waiting for environment to go live";
         String failureMessage = "Exceeded max retries for polling environment status. Check AWS console for more info.";
 
         conditionalService.waitForCondition(statusMessage, failureMessage, WAIT_FOR_READY_POLLING_IN_SECS,
-                () -> environmentIsReady(environmentName, applicationName, versionLabel));
+                () -> environmentIsReady(environmentId));
     }
 
-    private boolean environmentIsReady(String environmentName, String applicationName, String versionLabel) {
-        EnvironmentDescription environment = getEnvironment(environmentName, applicationName, versionLabel, false);
+    private boolean environmentIsReady(String environmentId) {
+        EnvironmentDescription environment = getEnvironment(environmentId);
         return environment != null && environment.getStatus().equals(READY);
     }
 
