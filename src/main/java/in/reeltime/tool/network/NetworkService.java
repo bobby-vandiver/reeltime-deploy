@@ -76,6 +76,8 @@ public class NetworkService {
 
         SecurityGroup loadBalancerSecurityGroup = createSecurityGroup(vpc, "load-balancer");
 
+        loadBalancerSecurityGroup = securityGroupService.addIngressRule(loadBalancerSecurityGroup, "0.0.0.0/0", "tcp", 443);
+
         SecurityGroup applicationSecurityGroup = createSecurityGroup(vpc, "application");
         SecurityGroup databaseSecurityGroup = createSecurityGroup(vpc, "database");
 

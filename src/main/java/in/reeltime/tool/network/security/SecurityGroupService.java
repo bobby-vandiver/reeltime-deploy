@@ -163,6 +163,10 @@ public class SecurityGroupService {
         return securityGroup.getIpPermissionsEgress().containsAll(permissions);
     }
 
+    public SecurityGroup addIngressRule(SecurityGroup securityGroup, String inboundIpRange, String protocol, Integer port) {
+        return addIngressRule(securityGroup, Lists.newArrayList(inboundIpRange), protocol, port);
+    }
+
     public SecurityGroup addIngressRule(SecurityGroup securityGroup, Collection<String> inboundIpRanges, String protocol, Integer port) {
         String groupId = securityGroup.getGroupId();
 
