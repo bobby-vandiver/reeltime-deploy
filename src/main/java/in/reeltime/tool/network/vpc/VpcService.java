@@ -38,9 +38,31 @@ public class VpcService {
 
     public Vpc createVpc(String cidrBlock) {
         Logger.info("Creating vpc with cidr block [%s]", cidrBlock);
+
         CreateVpcRequest request = new CreateVpcRequest(cidrBlock);
         CreateVpcResult result = ec2.createVpc(request);
-        return result.getVpc();
+
+        Vpc vpc = result.getVpc();
+        updateVpcDnsSettings(vpc);
+        return vpc;
+    }
+
+    private void updateVpcDnsSettings(Vpc vpc) {
+        String vpcId = vpc.getVpcId();
+
+        Logger.info("Enabling DNS hostnames and support for vpc [%s]", vpcId);
+
+        ModifyVpcAttributeRequest dnsSupport = new ModifyVpcAttributeRequest()
+                .withVpcId(vpcId)
+                .withEnableDnsSupport(true);
+
+        ec2.modifyVpcAttribute(dnsSupport);
+
+        ModifyVpcAttributeRequest dnsHostnames = new ModifyVpcAttributeRequest()
+                .withVpcId(vpcId)
+                .withEnableDnsHostnames(true);
+
+        ec2.modifyVpcAttribute(dnsHostnames);
     }
 
     public void deleteVpc(Vpc vpc) {
