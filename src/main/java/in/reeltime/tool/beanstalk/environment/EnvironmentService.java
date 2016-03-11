@@ -28,38 +28,18 @@ public class EnvironmentService {
         this.conditionalService = conditionalService;
     }
 
-    public boolean environmentExists(String environmentName, String applicationName) {
-        EnvironmentDescription environment = getEnvironment(environmentName, applicationName);
-        return environment != null && !environment.getStatus().equals(TERMINATED);
-    }
-
     public boolean environmentExists(String environmentName, String applicationName, String versionLabel) {
-        EnvironmentDescription environment = getEnvironment(environmentName, applicationName, versionLabel, false);
+        EnvironmentDescription environment = getEnvironment(environmentName, applicationName, versionLabel);
         return environment != null && !environment.getStatus().equals(TERMINATED);
     }
 
-    public EnvironmentDescription getEnvironment(String environmentName, String applicationName) {
-        DescribeEnvironmentsRequest request = new DescribeEnvironmentsRequest()
-                .withApplicationName(applicationName)
-                .withEnvironmentNames(environmentName);
-
-        Logger.info("Getting environment [%s] for application [%s]", environmentName, applicationName);
-        return getEnvironment(request);
-    }
-
-    public EnvironmentDescription getEnvironment(String environmentName, String applicationName, String versionLabel) {
-        return getEnvironment(environmentName, applicationName, versionLabel, true);
-    }
-
-    private EnvironmentDescription getEnvironment(String environmentName, String applicationName, String versionLabel, boolean log) {
+    private EnvironmentDescription getEnvironment(String environmentName, String applicationName, String versionLabel) {
         DescribeEnvironmentsRequest request = new DescribeEnvironmentsRequest()
                 .withApplicationName(applicationName)
                 .withEnvironmentNames(environmentName)
+                .withIncludeDeleted(false)
                 .withVersionLabel(versionLabel);
 
-        if (log) {
-            Logger.info("Getting environment [%s] for application [%s] -- version [%s]", environmentName, applicationName, versionLabel);
-        }
         return getEnvironment(request);
     }
 
@@ -74,6 +54,11 @@ public class EnvironmentService {
         DescribeEnvironmentsResult result = eb.describeEnvironments(request);
 
         List<EnvironmentDescription> environmentDescriptions = result.getEnvironments();
+
+        if (environmentDescriptions.size() > 1) {
+            Logger.warn("Found multiple environments: " + environmentDescriptions);
+        }
+
         return !environmentDescriptions.isEmpty() ? environmentDescriptions.get(0) : null;
     }
 
