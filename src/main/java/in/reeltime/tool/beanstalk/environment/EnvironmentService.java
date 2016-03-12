@@ -37,7 +37,6 @@ public class EnvironmentService {
         DescribeEnvironmentsRequest request = new DescribeEnvironmentsRequest()
                 .withApplicationName(applicationName)
                 .withEnvironmentNames(environmentName)
-                .withIncludeDeleted(false)
                 .withVersionLabel(versionLabel);
 
         return getEnvironment(request);
@@ -51,6 +50,7 @@ public class EnvironmentService {
     }
 
     private EnvironmentDescription getEnvironment(DescribeEnvironmentsRequest request) {
+        request.setIncludeDeleted(false);
         DescribeEnvironmentsResult result = eb.describeEnvironments(request);
 
         List<EnvironmentDescription> environmentDescriptions = result.getEnvironments();
