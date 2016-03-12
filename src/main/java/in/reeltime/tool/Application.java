@@ -16,6 +16,7 @@ public class Application {
     private static final String APPLICATION_NAME_OPT = "application-name";
     private static final String APPLICATION_VERSION_OPT = "application-version";
     private static final String WAR_PATH_OPT = "war";
+    private static final String CERTIFICATE_DOMAIN_NAME_OPT = "certificate-domain-name";
     private static final String PRODUCTION_FLAG_OPT = "production";
     private static final String REMOVE_RESOURCES_FLAG_OPT = "remote-resources";
 
@@ -25,6 +26,7 @@ public class Application {
             .add(APPLICATION_NAME_OPT)
             .add(APPLICATION_VERSION_OPT)
             .add(WAR_PATH_OPT)
+            .add(CERTIFICATE_DOMAIN_NAME_OPT)
             .build();
 
     public static void main(String[] args) {
@@ -47,6 +49,7 @@ public class Application {
             String applicationVersion = line.getOptionValue(APPLICATION_VERSION_OPT);
 
             String warPath = line.getOptionValue(WAR_PATH_OPT);
+            String certificateDomainName = line.getOptionValue(CERTIFICATE_DOMAIN_NAME_OPT);
 
             String productionFlag = line.getOptionValue(PRODUCTION_FLAG_OPT);
             String removeResourcesFlag = line.getOptionValue(REMOVE_RESOURCES_FLAG_OPT);
@@ -59,7 +62,7 @@ public class Application {
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
 
             DeploymentService deploymentService = serviceFactory.deploymentService();
-            deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war, production, removeResources);
+            deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war, certificateDomainName, production, removeResources);
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
@@ -87,6 +90,9 @@ public class Application {
 
         Option war = option(WAR_PATH_OPT, true, "The file path to the war to deploy.");
         options.addOption(war);
+
+        Option certificateDomainName = option(CERTIFICATE_DOMAIN_NAME_OPT, true, "The domain name of the certificate to use.");
+        options.addOption(certificateDomainName);
 
         Option production = option(PRODUCTION_FLAG_OPT, false, "Flag to enable additional configuration for production environment.");
         options.addOption(production);

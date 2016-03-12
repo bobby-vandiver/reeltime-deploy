@@ -43,7 +43,7 @@ public class DeploymentService {
     }
 
     public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
-                       File war, boolean production, boolean removeResources) throws FileNotFoundException {
+                       File war, String certificateDomainName, boolean production, boolean removeResources) throws FileNotFoundException {
         if (!war.exists()) {
             String message = String.format("War file [%s] not found", war.getName());
             throw new FileNotFoundException(message);
@@ -68,7 +68,7 @@ public class DeploymentService {
                 storage.getPlaylistsAndSegmentsBucket(),
                 transcoderTopicName);
 
-        Access access = accessService.setupAccess(rolePolicyParameters);
+        Access access = accessService.setupAccess(rolePolicyParameters, certificateDomainName);
         Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
 
         DeploymentConfiguration configuration = new DeploymentConfiguration.Builder()
