@@ -6,6 +6,7 @@ import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.rds.AmazonRDS;
+import com.amazonaws.services.route53.AmazonRoute53;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.sns.AmazonSNS;
 import in.reeltime.tool.access.AccessService;
@@ -23,6 +24,9 @@ import in.reeltime.tool.database.DatabaseService;
 import in.reeltime.tool.database.instance.DatabaseInstanceService;
 import in.reeltime.tool.database.subnet.DatabaseSubnetGroupService;
 import in.reeltime.tool.deployment.DeploymentService;
+import in.reeltime.tool.dns.DNSService;
+import in.reeltime.tool.dns.record.RecordService;
+import in.reeltime.tool.dns.zone.HostedZoneService;
 import in.reeltime.tool.name.AmazonEC2NameService;
 import in.reeltime.tool.name.NameService;
 import in.reeltime.tool.network.NetworkService;
@@ -145,7 +149,16 @@ public class ServiceFactory {
         return new BeanstalkService(environmentService, applicationService, applicationVersionService, objectService, subscriptionService);
     }
 
+    public DNSService dnsService() {
+        AmazonRoute53 route53 = awsClientFactory.route53();
+
+        HostedZoneService hostedZoneService = new HostedZoneService(route53);
+        RecordService recordService = new RecordService(route53);
+
+        return new DNSService(hostedZoneService, recordService);
+    }
+
     public DeploymentService deploymentService() {
-        return new DeploymentService(networkService(), databaseService(), storageService(), accessService(), transcoderService(), beanstalkService());
+        return new DeploymentService(networkService(), databaseService(), storageService(), accessService(), transcoderService(), beanstalkService(), dnsService());
     }
 }

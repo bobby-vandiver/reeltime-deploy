@@ -16,6 +16,8 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.AmazonRDSClient;
+import com.amazonaws.services.route53.AmazonRoute53;
+import com.amazonaws.services.route53.AmazonRoute53Client;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.sns.AmazonSNS;
@@ -58,6 +60,10 @@ public class AwsClientFactory {
 
     public AmazonRDS rds() {
         return new AmazonRDSClient(credentials, clientConfiguration());
+    }
+
+    public AmazonRoute53 route53() {
+        return new AmazonRoute53Client(credentials, clientConfiguration());
     }
 
     public AmazonS3 s3() {
