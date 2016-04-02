@@ -50,7 +50,7 @@ public class DeploymentService {
     public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
                        File war, String certificateDomainName, boolean production, boolean removeResources) throws FileNotFoundException {
 
-        dnsService.setupDNS(environmentName, "bobbyvandiver.com.", "loadbalancer");
+        dnsService.setupDNS(environmentName, "bobbyvandiver.com.", "dualstack.test-load-balancer-792663302.us-east-1.elb.amazonaws.com");
 //        if (!war.exists()) {
 //            String message = String.format("War file [%s] not found", war.getName());
 //            throw new FileNotFoundException(message);

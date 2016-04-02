@@ -152,8 +152,10 @@ public class ServiceFactory {
     public DNSService dnsService() {
         AmazonRoute53 route53 = awsClientFactory.route53();
 
+        ConditionalService conditionalService = new ConditionalService();
+
         HostedZoneService hostedZoneService = new HostedZoneService(route53);
-        RecordService recordService = new RecordService(route53);
+        RecordService recordService = new RecordService(route53, conditionalService);
 
         return new DNSService(hostedZoneService, recordService);
     }
