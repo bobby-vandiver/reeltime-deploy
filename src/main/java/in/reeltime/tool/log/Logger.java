@@ -10,6 +10,15 @@ public class Logger {
 
     private Logger() { }
 
+    public static void debug(String message) {
+        log("DEBUG", message);
+    }
+
+    public static void debug(String format, Object... args) {
+        String message = String.format(format, args);
+        log("DEBUG", message);
+    }
+
     public static void info(String message) {
         log("INFO", message);
     }

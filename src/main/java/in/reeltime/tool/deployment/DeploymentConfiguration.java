@@ -18,6 +18,8 @@ public class DeploymentConfiguration {
 
     private final String applicationVersion;
 
+    private final String hostedZoneDomainName;
+
     private final File war;
 
     private final Network network;
@@ -35,6 +37,7 @@ public class DeploymentConfiguration {
         this.environmentName = builder.environmentName;
         this.applicationName = builder.applicationName;
         this.applicationVersion = builder.applicationVersion;
+        this.hostedZoneDomainName = builder.hostedZoneDomainName;
         this.war = builder.war;
         this.network = builder.network;
         this.database = builder.database;
@@ -57,6 +60,10 @@ public class DeploymentConfiguration {
 
     public String getApplicationVersion() {
         return applicationVersion;
+    }
+
+    public String getHostedZoneDomainName() {
+        return hostedZoneDomainName;
     }
 
     public File getWar() {
@@ -89,6 +96,7 @@ public class DeploymentConfiguration {
         private String environmentName;
         private String applicationName;
         private String applicationVersion;
+        private String hostedZoneDomainName;
         private File war;
         private Network network;
         private Database database;
@@ -113,6 +121,11 @@ public class DeploymentConfiguration {
 
         Builder withApplicationVersion(String applicationVersion) {
             this.applicationVersion = applicationVersion;
+            return this;
+        }
+
+        Builder withHostedZoneDomainName(String hostedZoneDomainName) {
+            this.hostedZoneDomainName = hostedZoneDomainName;
             return this;
         }
 

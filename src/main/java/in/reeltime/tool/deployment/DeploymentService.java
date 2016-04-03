@@ -32,65 +32,61 @@ public class DeploymentService {
 
     private final BeanstalkService beanstalkService;
 
-    private final DNSService dnsService;
-
     public DeploymentService(NetworkService networkService, DatabaseService databaseService,
                              StorageService storageService, AccessService accessService,
-                             TranscoderService transcoderService, BeanstalkService beanstalkService,
-                             DNSService dnsService) {
+                             TranscoderService transcoderService, BeanstalkService beanstalkService) {
         this.networkService = networkService;
         this.databaseService = databaseService;
         this.storageService = storageService;
         this.accessService = accessService;
         this.transcoderService = transcoderService;
         this.beanstalkService = beanstalkService;
-        this.dnsService = dnsService;
     }
 
     public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
-                       File war, String certificateDomainName, boolean production, boolean removeResources) throws FileNotFoundException {
+                       File war, String hostedZoneDomainName, String certificateDomainName,
+                       boolean production, boolean removeResources) throws FileNotFoundException {
+        if (!war.exists()) {
+            String message = String.format("War file [%s] not found", war.getName());
+            throw new FileNotFoundException(message);
+        }
 
-        dnsService.setupDNS(environmentName, "bobbyvandiver.com", "test-load-balancer-792663302.us-east-1.elb.amazonaws.com");
-//        if (!war.exists()) {
-//            String message = String.format("War file [%s] not found", war.getName());
-//            throw new FileNotFoundException(message);
-//        }
-//
-//        if (!production) {
-//            Logger.info("Tearing down transcoder and database so they are recreated");
-//            transcoderService.tearDownTranscoder();
-//            databaseService.tearDownDatabase();
-//        }
-//
-//        Network network = networkService.setupNetwork();
-//        Database database = databaseService.setupDatabase(network);
-//
-//        Storage storage = storageService.setupStorage();
-//        String transcoderTopicName = transcoderService.getTranscoderTopicName();
-//
-//        RolePolicyParameters rolePolicyParameters = new RolePolicyParameters(
-//                accountId,
-//                storage.getMasterVideosBucket(),
-//                storage.getThumbnailsBucket(),
-//                storage.getPlaylistsAndSegmentsBucket(),
-//                transcoderTopicName);
-//
-//        Access access = accessService.setupAccess(rolePolicyParameters, certificateDomainName);
-//        Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
-//
-//        DeploymentConfiguration configuration = new DeploymentConfiguration.Builder()
-//                .isProduction(production)
-//                .withAccess(access)
-//                .withApplicationName(applicationName)
-//                .withApplicationVersion(applicationVersion)
-//                .withDatabase(database)
-//                .withEnvironmentName(environmentName)
-//                .withNetwork(network)
-//                .withStorage(storage)
-//                .withTranscoder(transcoder)
-//                .withWar(war)
-//                .build();
-//
-//        beanstalkService.deploy(configuration);
+        if (!production) {
+            Logger.info("Tearing down transcoder and database so they are recreated");
+            transcoderService.tearDownTranscoder();
+            databaseService.tearDownDatabase();
+        }
+
+        Network network = networkService.setupNetwork();
+        Database database = databaseService.setupDatabase(network);
+
+        Storage storage = storageService.setupStorage();
+        String transcoderTopicName = transcoderService.getTranscoderTopicName();
+
+        RolePolicyParameters rolePolicyParameters = new RolePolicyParameters(
+                accountId,
+                storage.getMasterVideosBucket(),
+                storage.getThumbnailsBucket(),
+                storage.getPlaylistsAndSegmentsBucket(),
+                transcoderTopicName);
+
+        Access access = accessService.setupAccess(rolePolicyParameters, certificateDomainName);
+        Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
+
+        DeploymentConfiguration configuration = new DeploymentConfiguration.Builder()
+                .isProduction(production)
+                .withAccess(access)
+                .withApplicationName(applicationName)
+                .withApplicationVersion(applicationVersion)
+                .withDatabase(database)
+                .withEnvironmentName(environmentName)
+                .withHostedZoneDomainName(hostedZoneDomainName)
+                .withNetwork(network)
+                .withStorage(storage)
+                .withTranscoder(transcoder)
+                .withWar(war)
+                .build();
+
+        beanstalkService.deploy(configuration);
     }
 }

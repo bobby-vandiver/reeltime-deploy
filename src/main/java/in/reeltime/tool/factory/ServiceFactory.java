@@ -133,6 +133,9 @@ public class ServiceFactory {
     public BeanstalkService beanstalkService() {
         AWSElasticBeanstalk eb = awsClientFactory.eb();
 
+        AmazonElasticLoadBalancing elb = awsClientFactory.elb();
+        AmazonRoute53 route53 = awsClientFactory.route53();
+
         AmazonS3 s3 = awsClientFactory.s3();
         AmazonSNS sns = awsClientFactory.sns();
 
@@ -147,22 +150,15 @@ public class ServiceFactory {
 
         SubscriptionService subscriptionService = new SubscriptionService(sns);
 
-        return new BeanstalkService(environmentService, applicationService, applicationVersionService, objectService, subscriptionService);
-    }
-
-    public DNSService dnsService() {
-        AmazonRoute53 route53 = awsClientFactory.route53();
-        AmazonElasticLoadBalancing elb = awsClientFactory.elb();
-
-        ConditionalService conditionalService = new ConditionalService();
-
         HostedZoneService hostedZoneService = new HostedZoneService(route53, elb);
         RecordService recordService = new RecordService(route53, conditionalService);
 
-        return new DNSService(hostedZoneService, recordService);
+        DNSService dnsService = new DNSService(hostedZoneService, recordService);
+
+        return new BeanstalkService(environmentService, applicationService, applicationVersionService, objectService, subscriptionService, dnsService, conditionalService);
     }
 
     public DeploymentService deploymentService() {
-        return new DeploymentService(networkService(), databaseService(), storageService(), accessService(), transcoderService(), beanstalkService(), dnsService());
+        return new DeploymentService(networkService(), databaseService(), storageService(), accessService(), transcoderService(), beanstalkService());
     }
 }

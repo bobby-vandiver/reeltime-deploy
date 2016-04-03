@@ -16,6 +16,7 @@ public class Application {
     private static final String APPLICATION_NAME_OPT = "application-name";
     private static final String APPLICATION_VERSION_OPT = "application-version";
     private static final String WAR_PATH_OPT = "war";
+    private static final String HOSTED_ZONE_DOMAIN_NAME_OPT = "hosted-zone-domain-name";
     private static final String CERTIFICATE_DOMAIN_NAME_OPT = "certificate-domain-name";
     private static final String PRODUCTION_FLAG_OPT = "production";
     private static final String REMOVE_RESOURCES_FLAG_OPT = "remote-resources";
@@ -26,6 +27,7 @@ public class Application {
             .add(APPLICATION_NAME_OPT)
             .add(APPLICATION_VERSION_OPT)
             .add(WAR_PATH_OPT)
+            .add(HOSTED_ZONE_DOMAIN_NAME_OPT)
             .add(CERTIFICATE_DOMAIN_NAME_OPT)
             .build();
 
@@ -38,7 +40,7 @@ public class Application {
 
             for (String requiredOpt : REQUIRED_OPTS) {
                 if (!line.hasOption(requiredOpt)) {
-                    throw new IllegalArgumentException("Missing required opt: " + requiredOpt);
+                    throw new ParseException("Missing required opt: " + requiredOpt);
                 }
             }
 
@@ -48,21 +50,23 @@ public class Application {
             String applicationName = line.getOptionValue(APPLICATION_NAME_OPT);
             String applicationVersion = line.getOptionValue(APPLICATION_VERSION_OPT);
 
-            String warPath = line.getOptionValue(WAR_PATH_OPT);
+            String hostedZoneDomainName = line.getOptionValue(HOSTED_ZONE_DOMAIN_NAME_OPT);
             String certificateDomainName = line.getOptionValue(CERTIFICATE_DOMAIN_NAME_OPT);
 
             String productionFlag = line.getOptionValue(PRODUCTION_FLAG_OPT);
             String removeResourcesFlag = line.getOptionValue(REMOVE_RESOURCES_FLAG_OPT);
 
+            String warPath = line.getOptionValue(WAR_PATH_OPT);
             File war = new File(warPath);
 
             boolean production = Boolean.parseBoolean(productionFlag);
             boolean removeResources = Boolean.parseBoolean(removeResourcesFlag);
 
             ServiceFactory serviceFactory = new ServiceFactory(environmentName);
-
             DeploymentService deploymentService = serviceFactory.deploymentService();
-            deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war, certificateDomainName, production, removeResources);
+
+            deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war,
+                    hostedZoneDomainName, certificateDomainName, production, removeResources);
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
@@ -90,6 +94,9 @@ public class Application {
 
         Option war = option(WAR_PATH_OPT, true, "The file path to the war to deploy.");
         options.addOption(war);
+
+        Option hostedZoneDomainName = option(HOSTED_ZONE_DOMAIN_NAME_OPT, true, "The domain name of the hosted zone to use.");
+        options.addOption(hostedZoneDomainName);
 
         Option certificateDomainName = option(CERTIFICATE_DOMAIN_NAME_OPT, true, "The domain name of the certificate to use.");
         options.addOption(certificateDomainName);
