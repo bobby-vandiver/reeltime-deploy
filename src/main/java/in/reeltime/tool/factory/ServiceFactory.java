@@ -3,6 +3,7 @@ package in.reeltime.tool.factory;
 import com.amazonaws.services.certificatemanager.AWSCertificateManager;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
+import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.rds.AmazonRDS;
@@ -151,10 +152,11 @@ public class ServiceFactory {
 
     public DNSService dnsService() {
         AmazonRoute53 route53 = awsClientFactory.route53();
+        AmazonElasticLoadBalancing elb = awsClientFactory.elb();
 
         ConditionalService conditionalService = new ConditionalService();
 
-        HostedZoneService hostedZoneService = new HostedZoneService(route53);
+        HostedZoneService hostedZoneService = new HostedZoneService(route53, elb);
         RecordService recordService = new RecordService(route53, conditionalService);
 
         return new DNSService(hostedZoneService, recordService);

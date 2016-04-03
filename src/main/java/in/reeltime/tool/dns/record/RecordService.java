@@ -17,10 +17,10 @@ public class RecordService {
     private static final long WAITING_POLLING_INTERVAL_SECS = 5;
 
     private static final String WAITING_FOR_INSYNC_STATUS_FORMAT =
-            "Waiting for change batch [%s] to be insync";
+            "Waiting for change batch [%s] to be INSYNC";
 
     private static final String WAITING_FOR_INSYNC_FAILED_FORMAT =
-            "Change batch [%s] did not become insync during the expected time";
+            "Change batch [%s] did not become INSYNC during the expected time";
 
     private final AmazonRoute53 route53;
     private final ConditionalService conditionalService;
@@ -30,7 +30,7 @@ public class RecordService {
         this.conditionalService = conditionalService;
     }
 
-    public boolean aliasRecordExists(HostedZone hostedZone, RRType recordType, String domainName, String aliasTargetDomainName) {
+    public boolean aliasRecordExists(HostedZone hostedZone, RRType recordType, String dnsName, String aliasTargetDNSName) {
         String hostedZoneId = hostedZone.getId();
 
         ListResourceRecordSetsRequest request = new ListResourceRecordSetsRequest(hostedZoneId);
@@ -39,41 +39,39 @@ public class RecordService {
         List<ResourceRecordSet> resourceRecordSets = result.getResourceRecordSets();
 
         Optional<ResourceRecordSet> optional = resourceRecordSets.stream()
-                .filter(r -> r.getName().equals(fqdn(domainName)) &&
+                .filter(r -> r.getName().startsWith(dnsName) &&
                         r.getType().equals(recordType.toString()) &&
                         r.getAliasTarget() != null &&
-                        r.getAliasTarget().getDNSName().equals(fqdn(aliasTargetDomainName)))
+                        r.getAliasTarget().getDNSName().startsWith(aliasTargetDNSName))
                 .findFirst();
 
         return optional.isPresent();
     }
 
-    public void addAliasARecord(HostedZone hostedZone, String domainName,
-                                HostedZone aliasTargetHostedZone, String aliasTargetDomainName) {
-        if (aliasRecordExists(hostedZone, RRType.A, domainName, aliasTargetDomainName)) {
+    public void addAliasARecord(HostedZone hostedZone, String dnsName,
+                                String aliasTargetHostedZoneId, String aliasTargetDNSName) {
+        if (aliasRecordExists(hostedZone, RRType.A, dnsName, aliasTargetDNSName)) {
             Logger.info("Alias A record for already exists for domain [%s] and alias target domain [%s]",
-                    domainName, aliasTargetDomainName);
+                    dnsName, aliasTargetDNSName);
             return;
         }
 
-        String aliasTargetHostedZoneId = aliasTargetHostedZone.getId();
-
         AliasTarget aliasTarget = new AliasTarget()
-                .withDNSName(aliasTargetDomainName)
+                .withDNSName(aliasTargetDNSName)
                 .withHostedZoneId(aliasTargetHostedZoneId)
                 .withEvaluateTargetHealth(false);
 
         ResourceRecordSet resourceRecordSet = new ResourceRecordSet()
                 .withAliasTarget(aliasTarget)
-                .withName(domainName)
+                .withName(dnsName)
                 .withType(RRType.A);
 
 
         Change change = new Change(ChangeAction.CREATE, resourceRecordSet);
         ChangeBatch changeBatch = new ChangeBatch(Lists.newArrayList(change));
 
-        Logger.info("Creating alias A record for domain [%s] and alias target domain [%s]",
-                domainName, aliasTargetDomainName);
+        Logger.info("Creating alias A record for dns name [%s] and alias target dns name [%s]",
+                dnsName, aliasTargetDNSName);
 
         String hostedZoneId = hostedZone.getId();
 
@@ -82,10 +80,6 @@ public class RecordService {
 
         String changeId = result.getChangeInfo().getId();
         waitForChangeBatchToSync(changeId);
-    }
-
-    private String fqdn(String domainName) {
-        return domainName + (domainName.endsWith(".") ? "" : ".");
     }
 
     private void waitForChangeBatchToSync(String changeId) {

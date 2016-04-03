@@ -15,12 +15,11 @@ public class DNSService {
         this.recordService = recordService;
     }
 
-    public void setupDNS(String environmentName, String domainName, String loadBalancerDomainName) {
+    public void setupDNS(String environmentName, String domainName, String loadBalancerDNSName) {
         HostedZone hostedZone = hostedZoneService.getHostedZone(domainName);
+        String dnsName = String.format("%s.%s", environmentName, domainName);
 
-        String fqdn = String.format("%s.%s", environmentName, domainName);
-
-        HostedZone loadBalancerHostedZone = new HostedZone().withId("Z35SXDOTRQ7X7K");
-        recordService.addAliasARecord(hostedZone, fqdn, loadBalancerHostedZone, loadBalancerDomainName);
+        String loadBalancerHostedZoneId = hostedZoneService.getHostedZoneIdForLoadBalancer(loadBalancerDNSName);
+        recordService.addAliasARecord(hostedZone, dnsName, loadBalancerHostedZoneId, loadBalancerDNSName);
     }
 }

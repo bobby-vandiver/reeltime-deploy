@@ -10,6 +10,8 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalk;
 import com.amazonaws.services.elasticbeanstalk.AWSElasticBeanstalkClient;
+import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancing;
+import com.amazonaws.services.elasticloadbalancing.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoder;
 import com.amazonaws.services.elastictranscoder.AmazonElasticTranscoderClient;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
@@ -48,6 +50,10 @@ public class AwsClientFactory {
 
     public AmazonEC2 ec2() {
         return new AmazonEC2Client(credentials, clientConfiguration());
+    }
+
+    public AmazonElasticLoadBalancing elb() {
+        return new AmazonElasticLoadBalancingClient(credentials, clientConfiguration());
     }
 
     public AmazonElasticTranscoder ets() {
