@@ -130,9 +130,8 @@ public class BeanstalkService {
         if (!production) {
             Logger.info("Removing all DNS records for non-production environment [%s]", environmentName);
             dnsService.deleteAllRecords(environmentName, hostedZoneDomainName);
-        }
 
-        Logger.info("Setting up DNS");
+        Logger.info("Adding (or updating) load balancer A record");
         dnsService.addLoadBalancerARecord(environmentName, hostedZoneDomainName, endpointUrl);
 
         String hostname = removeTrailingDot(environmentName) + "." + removeTrailingDot(hostedZoneDomainName);

@@ -63,10 +63,10 @@ public class RecordService {
                 .withType(RRType.A);
 
 
-        Logger.info("Creating alias A record for dns name [%s] and alias target dns name [%s]",
+        Logger.info("Creating or updating alias A record for dns name [%s] and alias target dns name [%s]",
                 dnsName, aliasTargetDNSName);
 
-        Change change = new Change(ChangeAction.CREATE, resourceRecordSet);
+        Change change = new Change(ChangeAction.UPSERT, resourceRecordSet);
         ChangeBatch changeBatch = new ChangeBatch(Lists.newArrayList(change));
 
         submitChangeBatch(hostedZone, changeBatch);
