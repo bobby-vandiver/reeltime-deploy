@@ -8,6 +8,7 @@ import in.reeltime.tool.log.Logger;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class RecordService {
 
@@ -31,12 +32,7 @@ public class RecordService {
     }
 
     public boolean aliasRecordExists(HostedZone hostedZone, RRType recordType, String dnsName, String aliasTargetDNSName) {
-        String hostedZoneId = hostedZone.getId();
-
-        ListResourceRecordSetsRequest request = new ListResourceRecordSetsRequest(hostedZoneId);
-        ListResourceRecordSetsResult result = route53.listResourceRecordSets(request);
-
-        List<ResourceRecordSet> resourceRecordSets = result.getResourceRecordSets();
+        List<ResourceRecordSet> resourceRecordSets = getResourceRecordSets(hostedZone);
 
         Optional<ResourceRecordSet> optional = resourceRecordSets.stream()
                 .filter(r -> r.getName().startsWith(dnsName) &&
@@ -67,12 +63,45 @@ public class RecordService {
                 .withType(RRType.A);
 
 
-        Change change = new Change(ChangeAction.CREATE, resourceRecordSet);
-        ChangeBatch changeBatch = new ChangeBatch(Lists.newArrayList(change));
-
         Logger.info("Creating alias A record for dns name [%s] and alias target dns name [%s]",
                 dnsName, aliasTargetDNSName);
 
+        Change change = new Change(ChangeAction.CREATE, resourceRecordSet);
+        ChangeBatch changeBatch = new ChangeBatch(Lists.newArrayList(change));
+
+        submitChangeBatch(hostedZone, changeBatch);
+    }
+
+    public void deleteAllRecords(HostedZone hostedZone, String dnsName) {
+        List<ResourceRecordSet> resourceRecordSets = getResourceRecordSets(hostedZone);
+
+        List<ResourceRecordSet> resourceRecordSetsToDelete = resourceRecordSets.stream()
+                .filter(r -> r.getName().equals(dnsName))
+                .collect(Collectors.toList());
+
+        List<Change> changes = Lists.newArrayList();
+
+        resourceRecordSetsToDelete.forEach(r -> {
+            Change change = new Change(ChangeAction.DELETE, r);
+            changes.add(change);
+        });
+
+        Logger.info("Deleting records for dns name [%s]");
+
+        ChangeBatch changeBatch = new ChangeBatch(changes);
+        submitChangeBatch(hostedZone, changeBatch);
+    }
+
+    private List<ResourceRecordSet> getResourceRecordSets(HostedZone hostedZone) {
+        String hostedZoneId = hostedZone.getId();
+
+        ListResourceRecordSetsRequest request = new ListResourceRecordSetsRequest(hostedZoneId);
+        ListResourceRecordSetsResult result = route53.listResourceRecordSets(request);
+
+        return result.getResourceRecordSets();
+    }
+
+    private void submitChangeBatch(HostedZone hostedZone, ChangeBatch changeBatch) {
         String hostedZoneId = hostedZone.getId();
 
         ChangeResourceRecordSetsRequest request = new ChangeResourceRecordSetsRequest(hostedZoneId, changeBatch);
