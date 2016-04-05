@@ -76,7 +76,7 @@ public class RecordService {
         List<ResourceRecordSet> resourceRecordSets = getResourceRecordSets(hostedZone);
 
         List<ResourceRecordSet> resourceRecordSetsToDelete = resourceRecordSets.stream()
-                .filter(r -> r.getName().equals(dnsName))
+                .filter(r -> r.getName().startsWith(dnsName))
                 .collect(Collectors.toList());
 
         List<Change> changes = Lists.newArrayList();
@@ -86,7 +86,12 @@ public class RecordService {
             changes.add(change);
         });
 
-        Logger.info("Deleting records for dns name [%s]");
+        if (changes.isEmpty()) {
+            Logger.info("No resource record sets to delete for dns name [%s]", dnsName);
+            return;
+        }
+
+        Logger.info("Deleting records for dns name [%s]", dnsName);
 
         ChangeBatch changeBatch = new ChangeBatch(changes);
         submitChangeBatch(hostedZone, changeBatch);
