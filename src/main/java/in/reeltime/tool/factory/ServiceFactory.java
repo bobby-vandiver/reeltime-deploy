@@ -52,8 +52,8 @@ public class ServiceFactory {
     private final String environmentName;
     private final AwsClientFactory awsClientFactory;
 
-    public ServiceFactory(String environmentName) {
-        this(environmentName, new AwsClientFactory());
+    public ServiceFactory(String environmentName, String awsAccessKey, String awsSecretKey) {
+        this(environmentName, new AwsClientFactory(awsAccessKey, awsSecretKey));
     }
 
     public ServiceFactory(String environmentName, AwsClientFactory awsClientFactory) {

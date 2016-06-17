@@ -11,6 +11,8 @@ import java.util.List;
 
 public class Application {
 
+    private static final String AWS_ACCESS_KEY_OPT = "aws-access-key";
+    private static final String AWS_SECRET_KEY_OPT = "aws-secret-key";
     private static final String ACCOUNT_ID_OPT = "account-id";
     private static final String ENVIRONMENT_NAME_OPT = "environment-name";
     private static final String APPLICATION_NAME_OPT = "application-name";
@@ -22,6 +24,8 @@ public class Application {
     private static final String REMOVE_RESOURCES_FLAG_OPT = "remote-resources";
 
     private static final List<String> REQUIRED_OPTS = new ImmutableList.Builder<String>()
+            .add(AWS_ACCESS_KEY_OPT)
+            .add(AWS_SECRET_KEY_OPT)
             .add(ACCOUNT_ID_OPT)
             .add(ENVIRONMENT_NAME_OPT)
             .add(APPLICATION_NAME_OPT)
@@ -44,6 +48,9 @@ public class Application {
                 }
             }
 
+            String awsAccessKey = line.getOptionValue(AWS_ACCESS_KEY_OPT);
+            String awsSecretKey = line.getOptionValue(AWS_SECRET_KEY_OPT);
+
             String accountId = line.getOptionValue(ACCOUNT_ID_OPT);
             String environmentName = line.getOptionValue(ENVIRONMENT_NAME_OPT);
 
@@ -62,7 +69,7 @@ public class Application {
             boolean production = Boolean.parseBoolean(productionFlag);
             boolean removeResources = Boolean.parseBoolean(removeResourcesFlag);
 
-            ServiceFactory serviceFactory = new ServiceFactory(environmentName);
+            ServiceFactory serviceFactory = new ServiceFactory(environmentName, awsAccessKey, awsSecretKey);
             DeploymentService deploymentService = serviceFactory.deploymentService();
 
             deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war,
@@ -79,6 +86,12 @@ public class Application {
 
     private static Options getOptions() {
         Options options = new Options();
+
+        Option awsAccessKey = option(AWS_ACCESS_KEY_OPT, true, "The AWS access key.");
+        options.addOption(awsAccessKey);
+
+        Option awsSecretKey = option(AWS_SECRET_KEY_OPT, true, "The AWS secret key.");
+        options.addOption(awsSecretKey);
 
         Option accountId = option(ACCOUNT_ID_OPT, true, "The AWS Account ID.");
         options.addOption(accountId);

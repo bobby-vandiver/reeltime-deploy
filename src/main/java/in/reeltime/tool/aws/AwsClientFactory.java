@@ -32,8 +32,8 @@ public class AwsClientFactory {
 
     private final AWSCredentials credentials;
 
-    public AwsClientFactory() {
-        this(loadCredentials());
+    public AwsClientFactory(String accessKey, String secretKey) {
+        this(new BasicAWSCredentials(accessKey, secretKey));
     }
 
     public AwsClientFactory(AWSCredentials credentials) {
@@ -87,11 +87,5 @@ public class AwsClientFactory {
         clientConfiguration.setRetryPolicy(new RetryPolicy(null, null, MAX_ERROR_RETRY, true));
 
         return clientConfiguration;
-    }
-
-    private static AWSCredentials loadCredentials() {
-        String accessKey = SystemPropertyUtil.getSystemProperty("AWSAccessKey");
-        String secretKey = SystemPropertyUtil.getSystemProperty("AWSSecretKey");
-        return new BasicAWSCredentials(accessKey, secretKey);
     }
 }
