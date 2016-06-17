@@ -22,7 +22,7 @@ public class Application {
     private static final String CERTIFICATE_DOMAIN_NAME_OPT = "certificate-domain-name";
     private static final String MAILGUN_API_KEY_OPT = "mailgun-api-key";
     private static final String PRODUCTION_FLAG_OPT = "production";
-    private static final String REMOVE_RESOURCES_FLAG_OPT = "remote-resources";
+    private static final String REMOVE_RESOURCES_FLAG_OPT = "remove-resources";
 
     private static final List<String> REQUIRED_OPTS = new ImmutableList.Builder<String>()
             .add(AWS_ACCESS_KEY_OPT)
