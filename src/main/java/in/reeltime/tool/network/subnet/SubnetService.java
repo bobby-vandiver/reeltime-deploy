@@ -2,6 +2,7 @@ package in.reeltime.tool.network.subnet;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
+import in.reeltime.tool.condition.ConditionalService;
 import in.reeltime.tool.log.Logger;
 
 import java.util.Iterator;
@@ -9,10 +10,20 @@ import java.util.List;
 
 public class SubnetService {
 
-    private final AmazonEC2 ec2;
+    private static final long WAITING_POLLING_INTERVAL_SECS = 5;
 
-    public SubnetService(AmazonEC2 ec2) {
+    private static final String WAITING_FOR_SUBNET_TO_BE_CREATED_STATUS_FORMAT =
+            "Waiting for subnet [%s] to be created";
+
+    private static final String WAITING_FOR_SUBNET_TO_BE_CREATED_FAILED_FORMAT =
+            "Subnet [%s] was not created during the expected time";
+
+    private final AmazonEC2 ec2;
+    private final ConditionalService conditionalService;
+
+    public SubnetService(AmazonEC2 ec2, ConditionalService conditionalService) {
         this.ec2 = ec2;
+        this.conditionalService = conditionalService;
     }
 
     public List<AvailabilityZone> getAvailabilityZones() {
@@ -111,7 +122,19 @@ public class SubnetService {
         Logger.info("Creating subnet in vpc [%s] with availability zone [%s] and cidr block [%s]", vpcId, zoneName, cidrBlock);
         CreateSubnetResult result = ec2.createSubnet(request);
 
-        return result.getSubnet();
+        Subnet subnet = result.getSubnet();
+        String subnetId = subnet.getSubnetId();
+
+        waitForSubnetToBeCreated(vpc, availabilityZone, cidrBlock, subnetId);
+        return getSubnet(vpc, availabilityZone, cidrBlock);
+    }
+
+    private void waitForSubnetToBeCreated(Vpc vpc, AvailabilityZone availabilityZone, String cidrBlock, String subnetId) {
+        String statusMessage = String.format(WAITING_FOR_SUBNET_TO_BE_CREATED_STATUS_FORMAT, subnetId);
+        String failureMessage = String.format(WAITING_FOR_SUBNET_TO_BE_CREATED_FAILED_FORMAT, subnetId);
+
+        conditionalService.waitForCondition(statusMessage, failureMessage, WAITING_POLLING_INTERVAL_SECS,
+                () -> subnetExists(vpc, availabilityZone, cidrBlock));
     }
 
     public void deleteSubnet(Vpc vpc, String nameTag) {

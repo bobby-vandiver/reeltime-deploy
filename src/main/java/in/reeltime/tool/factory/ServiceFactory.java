@@ -65,12 +65,11 @@ public class ServiceFactory {
         AmazonEC2 ec2 = awsClientFactory.ec2();
         AmazonEC2NameService nameService = new AmazonEC2NameService(environmentName, ec2);
 
+        ConditionalService conditionalService = new ConditionalService();
         VpcService vpcService = new VpcService(ec2);
 
-        SubnetService subnetService = new SubnetService(ec2);
+        SubnetService subnetService = new SubnetService(ec2, conditionalService);
         RouteService routeService = new RouteService(ec2);
-
-        ConditionalService conditionalService = new ConditionalService();
 
         InternetGatewayService internetGatewayService = new InternetGatewayService(ec2);
         NatGatewayService natGatewayService = new NatGatewayService(ec2, conditionalService);
