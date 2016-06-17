@@ -81,7 +81,7 @@ public class Application {
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
-            helpFormatter.printHelp("reeltime-tool", options);
+            helpFormatter.printHelp("reeltime-deploy", options);
         }
         catch (FileNotFoundException e) {
             System.out.println("Could not find file: " + e.getMessage());
