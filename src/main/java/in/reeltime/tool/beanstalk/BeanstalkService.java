@@ -107,7 +107,8 @@ public class BeanstalkService {
                     deploymentConfiguration.getAccess(),
                     deploymentConfiguration.getStorage(),
                     deploymentConfiguration.getDatabase(),
-                    deploymentConfiguration.getTranscoder()
+                    deploymentConfiguration.getTranscoder(),
+                    deploymentConfiguration.getExternalConfiguration()
             );
 
             Logger.info("Creating new non-production environment [%s]", environmentName);

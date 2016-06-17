@@ -20,6 +20,7 @@ public class Application {
     private static final String WAR_PATH_OPT = "war";
     private static final String HOSTED_ZONE_DOMAIN_NAME_OPT = "hosted-zone-domain-name";
     private static final String CERTIFICATE_DOMAIN_NAME_OPT = "certificate-domain-name";
+    private static final String MAILGUN_API_KEY_OPT = "mailgun-api-key";
     private static final String PRODUCTION_FLAG_OPT = "production";
     private static final String REMOVE_RESOURCES_FLAG_OPT = "remote-resources";
 
@@ -33,6 +34,7 @@ public class Application {
             .add(WAR_PATH_OPT)
             .add(HOSTED_ZONE_DOMAIN_NAME_OPT)
             .add(CERTIFICATE_DOMAIN_NAME_OPT)
+            .add(MAILGUN_API_KEY_OPT)
             .build();
 
     public static void main(String[] args) {
@@ -66,6 +68,8 @@ public class Application {
             String warPath = line.getOptionValue(WAR_PATH_OPT);
             File war = new File(warPath);
 
+            String mailgunApiKey = line.getOptionValue(MAILGUN_API_KEY_OPT);
+
             boolean production = Boolean.parseBoolean(productionFlag);
             boolean removeResources = Boolean.parseBoolean(removeResourcesFlag);
 
@@ -73,7 +77,7 @@ public class Application {
             DeploymentService deploymentService = serviceFactory.deploymentService();
 
             deploymentService.deploy(accountId, environmentName, applicationName, applicationVersion, war,
-                    hostedZoneDomainName, certificateDomainName, production, removeResources);
+                    hostedZoneDomainName, certificateDomainName, mailgunApiKey, production, removeResources);
         }
         catch (ParseException e) {
             HelpFormatter helpFormatter = new HelpFormatter();
@@ -113,6 +117,9 @@ public class Application {
 
         Option certificateDomainName = option(CERTIFICATE_DOMAIN_NAME_OPT, true, "The domain name of the certificate to use.");
         options.addOption(certificateDomainName);
+
+        Option mailgunApiKey = option(MAILGUN_API_KEY_OPT, true, "The Mailgun API key.");
+        options.addOption(mailgunApiKey);
 
         Option production = option(PRODUCTION_FLAG_OPT, false, "Flag to enable additional configuration for production environment.");
         options.addOption(production);

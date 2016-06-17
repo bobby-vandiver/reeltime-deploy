@@ -6,6 +6,7 @@ import com.amazonaws.util.StringUtils;
 import com.google.common.collect.Lists;
 import in.reeltime.tool.access.Access;
 import in.reeltime.tool.database.Database;
+import in.reeltime.tool.external.ExternalConfiguration;
 import in.reeltime.tool.network.Network;
 import in.reeltime.tool.storage.Storage;
 import in.reeltime.tool.transcoder.Transcoder;
@@ -33,7 +34,8 @@ public class BeanstalkConfiguration {
 
     private final TomcatJvmConfiguration tomcatJvmConfiguration;
 
-    public BeanstalkConfiguration(Network network, Access access, Storage storage, Database database, Transcoder transcoder) {
+    public BeanstalkConfiguration(Network network, Access access, Storage storage, Database database,
+                                  Transcoder transcoder, ExternalConfiguration externalConfiguration) {
         this.vpcConfiguration = new VpcConfiguration(
                 network.getVpc().getVpcId(),
                 csv(network.getApplicationSubnets(), GET_SUBNET_ID),
@@ -71,7 +73,8 @@ public class BeanstalkConfiguration {
                 storage.getPlaylistsAndSegmentsBucket().getName(),
                 storage.getThumbnailsBucket().getName(),
                 transcoder.getPipeline().getName(),
-                "10"
+                "10",
+                externalConfiguration.getMailgunApiKey()
         );
 
         this.tomcatJvmConfiguration = new TomcatJvmConfiguration(
@@ -261,11 +264,13 @@ public class BeanstalkConfiguration {
         private final String thumbnailsBucketName;
         private final String transcoderPipelineName;
         private final String bcryptCostFactor;
+        private final String mailgunApiKey;
 
         private ApplicationEnvironmentConfiguration(String jdbcConnectionString, String databaseUsername,
-                                                   String databasePassword, String masterVideosBucketName,
-                                                   String playlistsAndSegmentsBucketName, String thumbnailsBucketName,
-                                                   String transcoderPipelineName, String bcryptCostFactor) {
+                                                    String databasePassword, String masterVideosBucketName,
+                                                    String playlistsAndSegmentsBucketName, String thumbnailsBucketName,
+                                                    String transcoderPipelineName, String bcryptCostFactor,
+                                                    String mailgunApiKey) {
             this.jdbcConnectionString = jdbcConnectionString;
             this.databaseUsername = databaseUsername;
             this.databasePassword = databasePassword;
@@ -274,6 +279,7 @@ public class BeanstalkConfiguration {
             this.thumbnailsBucketName = thumbnailsBucketName;
             this.transcoderPipelineName = transcoderPipelineName;
             this.bcryptCostFactor = bcryptCostFactor;
+            this.mailgunApiKey = mailgunApiKey;
         }
 
         public String getJdbcConnectionString() {
@@ -306,6 +312,10 @@ public class BeanstalkConfiguration {
 
         public String getBcryptCostFactor() {
             return bcryptCostFactor;
+        }
+
+        public String getMailgunApiKey() {
+            return mailgunApiKey;
         }
     }
 

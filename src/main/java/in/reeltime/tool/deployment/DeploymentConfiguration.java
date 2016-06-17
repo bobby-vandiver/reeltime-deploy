@@ -2,6 +2,7 @@ package in.reeltime.tool.deployment;
 
 import in.reeltime.tool.access.Access;
 import in.reeltime.tool.database.Database;
+import in.reeltime.tool.external.ExternalConfiguration;
 import in.reeltime.tool.network.Network;
 import in.reeltime.tool.storage.Storage;
 import in.reeltime.tool.transcoder.Transcoder;
@@ -32,6 +33,8 @@ public class DeploymentConfiguration {
 
     private final Transcoder transcoder;
 
+    private final ExternalConfiguration externalConfiguration;
+
     private DeploymentConfiguration(Builder builder) {
         this.production = builder.production;
         this.environmentName = builder.environmentName;
@@ -44,6 +47,7 @@ public class DeploymentConfiguration {
         this.storage = builder.storage;
         this.access = builder.access;
         this.transcoder = builder.transcoder;
+        this.externalConfiguration = builder.externalConfiguration;
     }
 
     public boolean isProduction() {
@@ -90,6 +94,10 @@ public class DeploymentConfiguration {
         return transcoder;
     }
 
+    public ExternalConfiguration getExternalConfiguration() {
+        return externalConfiguration;
+    }
+
     public static class Builder {
 
         private boolean production;
@@ -103,6 +111,7 @@ public class DeploymentConfiguration {
         private Storage storage;
         private Access access;
         private Transcoder transcoder;
+        private ExternalConfiguration externalConfiguration;
 
         Builder isProduction(boolean production) {
             this.production = production;
@@ -156,6 +165,11 @@ public class DeploymentConfiguration {
 
         Builder withTranscoder(Transcoder transcoder) {
             this.transcoder = transcoder;
+            return this;
+        }
+
+        Builder withExternalConfiguration(ExternalConfiguration externalConfiguration) {
+            this.externalConfiguration = externalConfiguration;
             return this;
         }
 

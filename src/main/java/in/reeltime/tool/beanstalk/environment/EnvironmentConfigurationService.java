@@ -96,6 +96,9 @@ public class EnvironmentConfigurationService {
         ConfigurationOptionSetting bcryptCostFactor =
                 applicationEnvironment("BCRYPT_COST_FACTOR", applicationEnvironmentConfiguration.getBcryptCostFactor());
 
+        ConfigurationOptionSetting mailgunApiKey =
+                applicationEnvironment("MAILGUN_API_KEY", applicationEnvironmentConfiguration.getMailgunApiKey());
+
         BeanstalkConfiguration.TomcatJvmConfiguration tomcatJvmConfiguration =
                 beanstalkConfiguration.getTomcatJvmConfiguration();
 
@@ -131,6 +134,7 @@ public class EnvironmentConfigurationService {
                 .add(thumbnailsBucketName)
                 .add(transcoderPipelineName)
                 .add(bcryptCostFactor)
+                .add(mailgunApiKey)
                 .add(jvmMaxHeapSize)
                 .add(jvmMaxPermSize)
                 .add(jvmInitHeapSize)

@@ -7,6 +7,7 @@ import in.reeltime.tool.beanstalk.BeanstalkService;
 import in.reeltime.tool.database.Database;
 import in.reeltime.tool.database.DatabaseService;
 import in.reeltime.tool.dns.DNSService;
+import in.reeltime.tool.external.ExternalConfiguration;
 import in.reeltime.tool.log.Logger;
 import in.reeltime.tool.network.Network;
 import in.reeltime.tool.network.NetworkService;
@@ -44,7 +45,7 @@ public class DeploymentService {
     }
 
     public void deploy(String accountId, String environmentName, String applicationName, String applicationVersion,
-                       File war, String hostedZoneDomainName, String certificateDomainName,
+                       File war, String hostedZoneDomainName, String certificateDomainName, String mailgunApiKey,
                        boolean production, boolean removeResources) throws FileNotFoundException {
         if (!war.exists()) {
             String message = String.format("War file [%s] not found", war.getName());
@@ -73,6 +74,10 @@ public class DeploymentService {
         Access access = accessService.setupAccess(rolePolicyParameters, certificateDomainName);
         Transcoder transcoder = transcoderService.setupTranscoder(storage, access);
 
+        ExternalConfiguration externalConfiguration = new ExternalConfiguration.Builder()
+                .withMailgunApiKey(mailgunApiKey)
+                .build();
+
         DeploymentConfiguration configuration = new DeploymentConfiguration.Builder()
                 .isProduction(production)
                 .withAccess(access)
@@ -80,6 +85,7 @@ public class DeploymentService {
                 .withApplicationVersion(applicationVersion)
                 .withDatabase(database)
                 .withEnvironmentName(environmentName)
+                .withExternalConfiguration(externalConfiguration)
                 .withHostedZoneDomainName(hostedZoneDomainName)
                 .withNetwork(network)
                 .withStorage(storage)
