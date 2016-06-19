@@ -53,8 +53,12 @@ public class DeploymentService {
         }
 
         if (!production) {
-            Logger.info("Tearing down transcoder and database so they are recreated");
+            Logger.info("Tearing down transcoder");
             transcoderService.tearDownTranscoder();
+        }
+
+        if (!production && !removeResources) {
+            Logger.info("Tearing down database");
             databaseService.tearDownDatabase();
         }
 
