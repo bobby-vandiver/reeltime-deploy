@@ -57,7 +57,7 @@ public class DeploymentService {
             transcoderService.tearDownTranscoder();
         }
 
-        if (!production && !removeResources) {
+        if (!production && removeResources) {
             Logger.info("Tearing down database");
             databaseService.tearDownDatabase();
         }
