@@ -20,6 +20,8 @@ public class BeanstalkConfiguration {
 
     private static Function<Object, String> GET_SUBNET_ID = (subnet) -> ((Subnet) subnet).getSubnetId();
 
+    private final boolean production;
+
     private final VpcConfiguration vpcConfiguration;
 
     private final LoadBalancerConfiguration loadBalancerConfiguration;
@@ -34,8 +36,11 @@ public class BeanstalkConfiguration {
 
     private final TomcatJvmConfiguration tomcatJvmConfiguration;
 
-    public BeanstalkConfiguration(Network network, Access access, Storage storage, Database database,
-                                  Transcoder transcoder, ExternalConfiguration externalConfiguration) {
+    public BeanstalkConfiguration(boolean production, Network network, Access access,
+                                  Storage storage, Database database, Transcoder transcoder,
+                                  ExternalConfiguration externalConfiguration) {
+        this.production = production;
+
         this.vpcConfiguration = new VpcConfiguration(
                 network.getVpc().getVpcId(),
                 csv(network.getApplicationSubnets(), GET_SUBNET_ID),
@@ -69,6 +74,7 @@ public class BeanstalkConfiguration {
                 getJdbcConnectionString(database),
                 database.getConfiguration().getMasterUsername(),
                 database.getConfiguration().getMasterPassword(),
+                production ? "false" : "true",
                 storage.getMasterVideosBucket().getName(),
                 storage.getPlaylistsAndSegmentsBucket().getName(),
                 storage.getThumbnailsBucket().getName(),
@@ -259,6 +265,7 @@ public class BeanstalkConfiguration {
         private final String jdbcConnectionString;
         private final String databaseUsername;
         private final String databasePassword;
+        private final String databaseDropAll;
         private final String masterVideosBucketName;
         private final String playlistsAndSegmentsBucketName;
         private final String thumbnailsBucketName;
@@ -267,13 +274,14 @@ public class BeanstalkConfiguration {
         private final String mailgunApiKey;
 
         private ApplicationEnvironmentConfiguration(String jdbcConnectionString, String databaseUsername,
-                                                    String databasePassword, String masterVideosBucketName,
-                                                    String playlistsAndSegmentsBucketName, String thumbnailsBucketName,
-                                                    String transcoderPipelineName, String bcryptCostFactor,
-                                                    String mailgunApiKey) {
+                                                    String databasePassword, String databaseDropAll,
+                                                    String masterVideosBucketName, String playlistsAndSegmentsBucketName,
+                                                    String thumbnailsBucketName, String transcoderPipelineName,
+                                                    String bcryptCostFactor, String mailgunApiKey) {
             this.jdbcConnectionString = jdbcConnectionString;
             this.databaseUsername = databaseUsername;
             this.databasePassword = databasePassword;
+            this.databaseDropAll = databaseDropAll;
             this.masterVideosBucketName = masterVideosBucketName;
             this.playlistsAndSegmentsBucketName = playlistsAndSegmentsBucketName;
             this.thumbnailsBucketName = thumbnailsBucketName;
@@ -292,6 +300,10 @@ public class BeanstalkConfiguration {
 
         public String getDatabasePassword() {
             return databasePassword;
+        }
+
+        public String getDatabaseDropAll() {
+            return databaseDropAll;
         }
 
         public String getMasterVideosBucketName() {

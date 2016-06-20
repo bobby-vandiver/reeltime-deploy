@@ -103,6 +103,7 @@ public class BeanstalkService {
 
         if (!production) {
             BeanstalkConfiguration configuration = new BeanstalkConfiguration(
+                    production,
                     deploymentConfiguration.getNetwork(),
                     deploymentConfiguration.getAccess(),
                     deploymentConfiguration.getStorage(),

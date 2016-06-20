@@ -81,6 +81,9 @@ public class EnvironmentConfigurationService {
         ConfigurationOptionSetting databasePassword =
                 applicationEnvironment("DATABASE_PASSWORD", applicationEnvironmentConfiguration.getDatabasePassword());
 
+        ConfigurationOptionSetting databaseDropAll =
+                applicationEnvironment("DATABASE_DROP_ALL", applicationEnvironmentConfiguration.getDatabaseDropAll());
+
         ConfigurationOptionSetting masterVideosBucketName =
                 applicationEnvironment("MASTER_VIDEOS_BUCKET_NAME", applicationEnvironmentConfiguration.getMasterVideosBucketName());
 
@@ -129,6 +132,7 @@ public class EnvironmentConfigurationService {
                 .add(jdbcConnectionString)
                 .add(databaseUsername)
                 .add(databasePassword)
+                .add(databaseDropAll)
                 .add(masterVideosBucketName)
                 .add(playlistsAndSegmentsBucketName)
                 .add(thumbnailsBucketName)
