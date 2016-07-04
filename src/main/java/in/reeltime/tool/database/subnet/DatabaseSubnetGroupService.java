@@ -44,6 +44,11 @@ public class DatabaseSubnetGroupService {
     }
 
     public DBSubnetGroup createSubnetGroup(String groupName, List<Subnet> subnets) {
+        if (subnetGroupExists(groupName)) {
+            Logger.info("Database subnet group [%s] already exists");
+            return getSubnetGroup(groupName);
+        }
+
         List<String> subnetIds = collectSubnetIds(subnets);
         String description = String.format(DESCRIPTION_FORMAT, groupName);
 
