@@ -1,2 +1,6 @@
 *.war
 endpoint-url.txt
+build/
+.idea/
+.gradle/
+*.iml
